@@ -44,6 +44,16 @@ function fm_options_ready() {
       }
     }
   });
+  jQuery('.fm_condition_is_select').change(function () {
+    if (jQuery(this).val() == '!' || jQuery(this).val() == '=') {
+      jQuery(this).parent().find('.fm_condition_field_input_value').hide()
+      jQuery(this).parent().find('.fm_condition_field_input_notice').hide()
+    }
+    else {
+      jQuery(this).parent().find('.fm_condition_field_input_value').show()
+      jQuery(this).parent().find('.fm_condition_field_input_notice').show()
+    }
+  })
   fm_remove_validate_error_message();
 }
 

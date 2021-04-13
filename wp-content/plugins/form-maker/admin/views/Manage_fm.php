@@ -621,7 +621,6 @@ class FMViewManage_fm extends FMAdminView {
         <?php echo $this->placeholders_popup($params['label_label']); ?>
       </div>
 
-
       <input type="hidden" name="form_front" id="form_front" value="<?php echo htmlentities($row->form_front); ?>" />
       <input type="hidden" name="form_fields" id="form_fields" />
       <input type="hidden" name="pagination" id="pagination" value="<?php echo $row->pagination; ?>" />
@@ -630,8 +629,8 @@ class FMViewManage_fm extends FMAdminView {
       <input type="hidden" name="public_key" id="public_key" />
       <input type="hidden" name="private_key" id="private_key" />
       <input type="hidden" name="recaptcha_theme" id="recaptcha_theme" />
-      <input type="hidden" id="label_order" name="label_order" value="<?php echo $row->label_order; ?>" />
-      <input type="hidden" id="label_order_current" name="label_order_current" value="<?php echo $row->label_order_current; ?>" />
+      <input type="hidden" id="label_order" name="label_order" value="<?php echo htmlentities($row->label_order); ?>" />
+      <input type="hidden" id="label_order_current" name="label_order_current" value="<?php echo htmlentities($row->label_order_current); ?>" />
       <input type="hidden" name="counter" id="counter" value="<?php echo $row->counter; ?>" />
       <input type="hidden" name="backup_id" id="backup_id" value="<?php echo $row->backup_id;?>">
       <input type="hidden" name="rev_id" id="rev_id">
@@ -741,6 +740,7 @@ class FMViewManage_fm extends FMAdminView {
    */
   public function body_email_options( $params = array() ) {
     $row = $params['row'];
+    $payment_method = isset($row->paypal_mode) ? intval($row->paypal_mode) : 0;
     $fields = $params['fields'];
     $fields_count = $params['fields_count'];
     ?>
@@ -874,9 +874,10 @@ class FMViewManage_fm extends FMAdminView {
                     ?>
                     <input style="<?php echo ($fields_count == 1) ? 'display: none;' : ''; ?>" class="wd-radio" type="radio" id="other1" name="reply_to" value="other" <?php echo ($is_other) ? 'checked="checked"' : ''; ?> onclick="wdshow('reply_to_other_wrap')" />
                     <label style="<?php echo ($fields_count == 1) ? 'display: none;' : ''; ?>" class="wd-label-radio" for="other1"><?php _e('Other', WDFMInstance(self::PLUGIN)->prefix); ?></label>
-                    <p style="display: <?php echo ($is_other) ? 'block;' : 'none;'; ?>" id="reply_to_other_wrap">
-                      <input class="fm-validate" data-type="email" data-callback="fm_validate_email" data-callback-parameter="" data-tab-id="emailTab" data-content-id="emailTab_fieldset" type="text" name="reply_to_other" value="<?php echo ($is_other && $row->reply_to) ? $row->reply_to : ''; ?>" id="reply_to_other" />
-                    </p>
+                    <div class="wd-group wd-has-placeholder" style="display: <?php echo ($is_other) ? 'block;' : 'none;'; ?> padding-top: 30px;" id="reply_to_other_wrap">
+                      <input class="fm-validate" data-tab-id="emailTab" data-content-id="emailTab_fieldset" type="text" name="reply_to_other" value="<?php echo ($is_other && $row->reply_to) ? $row->reply_to : ''; ?>" id="reply_to_other" />
+                      <span class="dashicons dashicons-list-view" data-id="reply_to_other"></span>
+                    </div>
                     <p class="description"><?php _e('Specify an alternative email address, to which the administrator will be able to reply upon receiving the message.', WDFMInstance(self::PLUGIN)->prefix); ?></p>
                   </div>
                   <div class="wd-group">
@@ -943,6 +944,20 @@ class FMViewManage_fm extends FMAdminView {
                 ?>
                 <p class="description"><?php _e('Use this setting to select the email field of your form, to which the submissions will be sent.', WDFMInstance(self::PLUGIN)->prefix); ?></p>
               </div>
+              <?php
+              if ($payment_method !== 0) { ?>
+              <div class="wd-group">
+                <label class="wd-label"><?php _e('Send Email', WDFMInstance(self::PLUGIN)->prefix); ?></label>
+                <div class="fm-row">
+                  <input type="radio" name="mail_send_email_payment" <?php echo $row->mail_send_email_payment == 1 ? 'checked="checked"' : '' ?> id="fm_send_email_payment-1" class="wd-radio" value="1">
+                  <label class="wd-label-radio" for="fm_send_email_payment-1"><?php _e('Before completion of payment', WDFMInstance(self::PLUGIN)->prefix); ?></label>
+                </div>
+                <div class="fm-row">
+                  <input type="radio" name="mail_send_email_payment" <?php echo $row->mail_send_email_payment == 0 ? 'checked="checked"' : '' ?> id="fm_send_email_payment-0" class="wd-radio" value="0">
+                  <label class="wd-label-radio" for="fm_send_email_payment-0"><?php _e('After payment has been successfully completed', WDFMInstance(self::PLUGIN)->prefix); ?></label>
+                </div>
+              </div>
+              <?php } ?>
               <div class="wd-group">
                 <label class="wd-label" for="mail_from_user"><?php _e('Email From', WDFMInstance(self::PLUGIN)->prefix); ?></label>
                 <input class="fm-validate" data-type="email" data-callback="fm_validate_email" data-callback-parameter="" data-tab-id="emailTab" data-content-id="emailTab_fieldset" type="text" id="mail_from_user" name="mail_from_user" value="<?php echo $row->mail_from_user; ?>" />
@@ -996,9 +1011,10 @@ class FMViewManage_fm extends FMAdminView {
                   <span><?php _e('Advanced', WDFMInstance(self::PLUGIN)->prefix); ?></span>
                 </h2>
                 <div class="inside">
-                  <div class="wd-group">
+                  <div class="wd-group wd-has-placeholder">
                     <label class="wd-label" for="reply_to_user"><?php _e('Reply to (if different from "Email From")', WDFMInstance(self::PLUGIN)->prefix); ?></label>
-                    <input class="fm-validate" data-type="email" data-callback="fm_validate_email" data-callback-parameter="" data-tab-id="emailTab" data-content-id="emailTab_fieldset" type="text" name="reply_to_user" value="<?php echo $row->reply_to_user; ?>" id="reply_to_user" />
+                    <input class="fm-validate" data-tab-id="emailTab" data-content-id="emailTab_fieldset" type="text" name="reply_to_user" value="<?php echo $row->reply_to_user; ?>" id="reply_to_user" />
+                    <span class="dashicons dashicons-list-view" data-id="reply_to_user"></span>
                     <p class="description"><?php _e('Specify an alternative email address, to which the submitter will be able to reply upon receiving the message.', WDFMInstance(self::PLUGIN)->prefix); ?></p>
                   </div>
                   <div class="wd-group">
@@ -1537,7 +1553,7 @@ class FMViewManage_fm extends FMAdminView {
                   ?>
                   <div class="wd-group <?php if(WDFMInstance(self::PLUGIN)->is_free) { echo 'fm-free-option'; } ?>">
                     <label class="wd-label" for="payment_currency"><?php _e('Payment Currency', WDFMInstance(self::PLUGIN)->prefix); ?></label>
-                    <select id="payment_currency" name="payment_currency" <?php disabled(WDFMInstance(self::PLUGIN)->is_free, true) ?>>
+                    <select id="payment_currency " name="payment_currency" <?php disabled(WDFMInstance(self::PLUGIN)->is_free, true) ?>>
                       <option value="USD" <?php echo(($row->payment_currency == 'USD') ? 'selected' : ''); ?>>$ &#8226; U.S. Dollar</option>
                       <option value="EUR" <?php echo(($row->payment_currency == 'EUR') ? 'selected' : ''); ?>>&#8364; &#8226; Euro</option>
                       <option value="GBP" <?php echo(($row->payment_currency == 'GBP') ? 'selected' : ''); ?>>&#163; &#8226; Pound Sterling</option>
@@ -1562,7 +1578,13 @@ class FMViewManage_fm extends FMAdminView {
                       <option value="PHP" <?php echo(($row->payment_currency == 'PHP') ? 'selected' : ''); ?>>&#8369; &#8226; Philippine Peso</option>
                       <option value="THB" <?php echo(($row->payment_currency == 'THB') ? 'selected' : ''); ?>>&#xe3f; &#8226; Thai Bahtv</option>
                       <option value="HRK" <?php echo(($row->payment_currency == 'HRK') ? 'selected' : ''); ?>>kn &#8226; Croatian Kuna</option>
-                      <option value="PKR" <?php echo(($row->payment_currency == 'PKR') ? 'selected' : ''); ?>>Rs &#8226; Pakistani Rupee</option>
+											<option value="PKR" <?php echo(($row->payment_currency == 'PKR') ? 'selected' : ''); ?>>Rs &#8226; Pakistani Rupee</option>
+											<option value="KES" <?php echo(($row->payment_currency == 'KES') ? 'selected' : ''); ?>>KSh &#8226; Kenya Shillings</option>
+                      <option value="UGX" <?php echo(($row->payment_currency == 'UGX') ? 'selected' : ''); ?>>USh &#8226; Uganda Shillings</option>
+                      <option value="TZS" <?php echo(($row->payment_currency == 'TZS') ? 'selected' : ''); ?>>TSh &#8226; Tanzanian Shillings</option>
+                      <option value="RWF" <?php echo(($row->payment_currency == 'RWF') ? 'selected' : ''); ?>>FRw &#8226; Rwandan Franc</option>
+                      <option value="NGN" <?php echo(($row->payment_currency == 'NGN') ? 'selected' : ''); ?>>&#8358; &#8226; Nigerian Naira</option>
+                      <option value="ZAR" <?php echo(($row->payment_currency == 'ZAR') ? 'selected' : ''); ?>>R &#8226; South African Rand</option>
                     </select>
                     <p class="description"><?php _e('Choose the currency to be used for the payments made through your form.', WDFMInstance(self::PLUGIN)->prefix); ?></p>
                   </div>
@@ -1653,7 +1675,8 @@ class FMViewManage_fm extends FMAdminView {
           "type_paypal_checkbox",
           "type_paypal_radio",
           "type_paypal_shipping",
-          "type_date_new"
+          "type_date_new",
+          "type_time"
         );
         $select_type_fields = array(
           "type_address",
@@ -1667,17 +1690,62 @@ class FMViewManage_fm extends FMAdminView {
         );
         $fields = explode('*:*new_field*:*', $row->form_fields);
         $fields = array_slice($fields, 0, count($fields) - 1);
-        foreach ( $fields as $field ) {
+        $address_fields_array = array();
+        foreach ( $fields as $i => $field ) {
           $temp = explode('*:*id*:*', $field);
-          array_push($ids, $temp[0]);
-          array_push($all_ids, $temp[0]);
+          $id_field = $temp[0];
+          array_push($ids, $id_field);
+          array_push($all_ids, $id_field);
           $temp = explode('*:*type*:*', $temp[1]);
+          if ( $temp[0] == 'type_address') {
+            $address_fields_array[$i] = $field;
+          }
           array_push($types, $temp[0]);
           $temp = explode('*:*w_field_label*:*', $temp[1]);
           array_push($labels, $temp[0]);
           array_push($all_labels, $temp[0]);
           array_push($paramss, $temp[1]);
         }
+        $address_params_names = array(
+          'id',
+          'type',
+          'w_field_label',
+          'w_field_label_size',
+          'w_field_label_pos',
+          'w_hide_label',
+          'w_size',
+          'w_mini_labels',
+          'w_disabled_fields',
+          'w_required',
+          'w_class',
+        );
+        if ( !empty($address_fields_array) ) {
+          foreach ( $address_fields_array as $i => $fields ) {
+            foreach ( $address_params_names as $params_key ) {
+              $tmp_field = explode('*:*' . $params_key . '*:*', $fields);
+              $params_names[$i][$params_key] = esc_html($tmp_field[0]);
+              $fields = $tmp_field[1];
+            }
+          }
+        }
+
+        foreach( $params_names as $val ) {
+          $address_mini_fields = array();
+          $address_mini_labels = explode('***', $val['w_mini_labels']);
+          foreach ( $address_mini_labels as $i => $label ) {
+            $key = $val['id'] . '_address_' . $i;
+            $type_key = ($i < 5) ? 'type_text' : 'type_address';
+            $value = $val['w_field_label']. ' (' . $label . ')';
+            $address_mini_fields[$key] = $value;
+
+            array_push($ids, $key);
+            array_push($all_ids, $key);
+            array_push($labels, $value);
+            array_push($all_labels, $value);
+            array_push($types, $type_key);
+          }
+        }
+
         foreach ( $types as $key => $value ) {
           if ( !in_array($types[$key], $select_and_input) ) {
             unset($ids[$key]);
@@ -1686,15 +1754,28 @@ class FMViewManage_fm extends FMAdminView {
             unset($paramss[$key]);
           }
         }
+
+        if ( !empty($address_fields_array) ) {
+          foreach($address_fields_array as $key => $val ) {
+            unset($ids[$key]);
+            unset($all_ids[$key]);
+            unset($labels[$key]);
+            unset($all_labels[$key]);
+            unset($types[$key]);
+          }
+        }
+
         $ids = array_values($ids);
         $labels = array_values($labels);
+
         $types = array_values($types);
         $paramss = array_values($paramss);
         $chose_ids = implode('@@**@@', $ids);
         $chose_labels = implode('@@**@@', $labels);
         $chose_types = implode('@@**@@', $types);
         $chose_paramss = implode('@@**@@', $paramss);
-		$chose_paramss = trim( str_replace(array("\r\n", "\r", "\n"),  '', $chose_paramss) );
+		    $chose_paramss = trim( str_replace(array("\r\n", "\r", "\n"),  '', $chose_paramss) );
+
         $all_ids_cond = implode('@@**@@', $all_ids);
         $all_labels_cond = implode('@@**@@', $all_labels);
         $show_hide = array();
@@ -1702,7 +1783,7 @@ class FMViewManage_fm extends FMAdminView {
         $all_any = array();
         $condition_params = array();
         $count_of_conditions = 0;
-        if ( $row->condition != "" ) {
+        if ( $row->condition != '' ) {
           $conditions = explode('*:*new_condition*:*', $row->condition);
           $conditions = array_slice($conditions, 0, count($conditions) - 1);
           $count_of_conditions = count($conditions);
@@ -1918,11 +1999,19 @@ class FMViewManage_fm extends FMAdminView {
                                     }
                                   }
                                   ?>
-                                  <input id="field_value<?php echo $k; ?>_<?php echo $key; ?>" type="text" value="<?php echo $param_values[2]; ?>" <?php echo $onkeypress_function; ?> class="fm_condition_field_input_value">
+                                  <input <?php echo (($param_values[1] == "!" || $param_values[1] == "=" ) ? 'style="display:none"' : ''); ?> id="field_value<?php echo $k; ?>_<?php echo $key; ?>" type="text" value="<?php echo $param_values[2]; ?>" <?php echo $onkeypress_function; ?> class="fm_condition_field_input_value">
+                                  <?php
+                                  if($types[$key_select_or_input] == 'type_time') {
+                                    ?>
+                                    <label>Please use HH:MM format for 24-hour time (e.g. 22:15), and HH:MM:AM or HH:MM:PM for 12-hour time (e.g. 05:20:AM / 07:30:PM).</label>
+                                    <?php
+                                  }
+                                  ?>
                                 <?php endif; ?>
                                 <span class="dashicons dashicons-trash" id="delete_condition<?php echo $k; ?>_<?php echo $key; ?>" onclick="delete_field_condition('<?php echo $k; ?>_<?php echo $key; ?>')"></span>
                               </div>
                               <?php
+                              }
                             }
                           }
                         }
@@ -1930,7 +2019,6 @@ class FMViewManage_fm extends FMAdminView {
                       </div>
                       <?php
                     }
-                  }
                   ?>
                 </div>
               </div>

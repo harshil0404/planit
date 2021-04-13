@@ -20,8 +20,7 @@ class FMViewFormmakerwdmathcaptcha extends FMAdminView {
       $cap_height = 26;
       $cap_quality = 100;
       $code = $this->code_generic($operations_count, $operations);
-      WDW_FM_Library(self::PLUGIN)->start_session();
-      $_SESSION[$i . '_wd_arithmetic_captcha_code'] = md5($code[1]);
+      Cookie_fm::saveCookieValueByKey($i, '_wd_arithmetic_captcha_code', md5($code[1]));
       $canvas = imagecreatetruecolor($cap_width, $cap_height);
       $c = imagecolorallocate($canvas, rand(150, 255), rand(150, 255), rand(150, 255));
       imagefilledrectangle($canvas, 0, 0, $cap_width, $cap_height, $c);

@@ -339,6 +339,7 @@ function change_choices(value, ids, types, params) {
 		case "type_spinner":
 		case "type_date_new":
 		case "type_phone_new":
+		case "type_time":
 			if(types_array[id]=="type_number" || types_array[id]=="type_phone")
 				var keypress_function = "return check_isnum_space(event)";
 			else
@@ -570,6 +571,7 @@ function add_condition_fields(num, ids1, labels1, types1, params1) {
 		case "type_spinner":
 		case "type_date_new":
 		case "type_phone_new":
+		case "type_time":
 		if(types[index_of_field]=="type_number" || types[index_of_field]=="type_phone")
 				var keypress_function = "return check_isnum_space(event)";
 			else
@@ -587,7 +589,12 @@ function add_condition_fields(num, ids1, labels1, types1, params1) {
 			label_input.setAttribute("onKeyPress", keypress_function);
 			
 		condition_div.appendChild(label_input);
-		
+			if(types[index_of_field]=="type_time") {
+				var hint = document.createElement('label')
+				hint.innerText = "Please use HH:MM format for 24-hour time (e.g. 22:15), and HH:MM:AM or HH:MM:PM for 12-hour time (e.g. 05:20:AM / 07:30:PM)."
+				hint.style.margin = "0 3px"
+				condition_div.appendChild(hint);
+			}
 		break;
 		
 		case "type_checkbox":
@@ -695,6 +702,16 @@ function add_condition_fields(num, ids1, labels1, types1, params1) {
 
 	condition_div.appendChild(trash_icon);
 	document.getElementById('condition'+num).appendChild(condition_div);
+	jQuery('.fm_condition_is_select').change(function () {
+		if (jQuery(this).val() == '!' || jQuery(this).val() == '=') {
+			jQuery(this).parent().find('.fm_condition_field_input_value').hide()
+			jQuery(this).parent().find('.fm_condition_field_input_notice').hide()
+		}
+		else {
+			jQuery(this).parent().find('.fm_condition_field_input_value').show()
+			jQuery(this).parent().find('.fm_condition_field_input_notice').show()
+		}
+	});
 }
 
 function add_condition(ids1, labels1, types1, params1, all_ids, all_labels) {

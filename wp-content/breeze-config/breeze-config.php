@@ -21,7 +21,6 @@
   'disable_per_adminuser' => '1',
   'exclude_url' => 
   array (
-    0 => 'http://localhost/splice/?wc-api=wc_facebook_get_feed_data&secret=55c4433eae4497807934189a8678eefc',
   ),
 ); 
 

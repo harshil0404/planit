@@ -21,7 +21,7 @@ class WDFMInsert {
     `theme` int(11) NOT NULL,
     `javascript` text NOT NULL,
     `submit_text` longtext NOT NULL,
-    `url` varchar(200) NOT NULL,
+    `url` varchar(500) NOT NULL,
     `submit_text_type` tinyint(4) NOT NULL,
     `script_mail` text NOT NULL,
     `script_mail_user` text NOT NULL,
@@ -65,6 +65,7 @@ class WDFMInsert {
     `mail_subject_user` varchar(128) NOT NULL,
     `mail_mode` tinyint(4) NOT NULL DEFAULT '1',
     `mail_mode_user` tinyint(4) NOT NULL DEFAULT '1',
+    `mail_send_email_payment` tinyint(4) NOT NULL DEFAULT '1',
     `mail_attachment` tinyint(4) NOT NULL DEFAULT '1',
     `mail_attachment_user` tinyint(4) NOT NULL DEFAULT '1',
     `user_id_wd` varchar(220) NOT NULL,
@@ -229,7 +230,7 @@ class WDFMInsert {
 	  `theme` int(11) NOT NULL,
 	  `javascript` text NOT NULL,
 	  `submit_text` longtext NOT NULL,
-	  `url` varchar(200) NOT NULL,
+	  `url` varchar(500) NOT NULL,
 	  `submit_text_type` tinyint(4) NOT NULL,
 	  `script_mail` text NOT NULL,
 	  `script_mail_user` text NOT NULL,
@@ -273,6 +274,7 @@ class WDFMInsert {
 	  `mail_subject_user` varchar(128) NOT NULL,
 	  `mail_mode` tinyint(4) NOT NULL DEFAULT '1',
 	  `mail_mode_user` tinyint(4) NOT NULL DEFAULT '1',
+    `mail_send_email_payment` tinyint(4) NOT NULL DEFAULT '1',
 	  `mail_attachment` tinyint(4) NOT NULL DEFAULT '1',
 	  `mail_attachment_user` tinyint(4) NOT NULL DEFAULT '1',
 	  `user_id_wd` varchar(220) NOT NULL,
@@ -295,6 +297,14 @@ class WDFMInsert {
 	  PRIMARY KEY (`backup_id`)
 	) " . $charset_collate . ";";
     $wpdb->query($formmaker_backup);
+
+  $formmaker_cookies = 'CREATE TABLE IF NOT EXISTS `' . $wpdb->prefix . 'formmaker_cookies` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `cookie_id` varchar(32) NOT NULL,
+    `value` text NOT NULL,
+    PRIMARY KEY (`id`)
+  ) ' . $charset_collate . ';';
+    $wpdb->query($formmaker_cookies);
     return;
   }
 

@@ -45,6 +45,8 @@ class FMModelUninstall_fm extends FMAdminModel {
       delete_option('tenweb_notice_status');
       delete_option('tenweb_webinar_status');
       delete_option('wd_bk_notice_status');
+      delete_option('fm_alter_table_notice');
+      delete_option('fm_alter_table_privilege');
       wp_delete_post($email_verification_post_id);
 
       // Delete form js and css files.

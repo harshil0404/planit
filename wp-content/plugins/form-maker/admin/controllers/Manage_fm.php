@@ -735,6 +735,7 @@ class FMControllerManage_fm extends FMAdminController {
     $mail_subject = WDW_FM_Library(self::PLUGIN)->get('mail_subject', '');
     $mail_subject_user = WDW_FM_Library(self::PLUGIN)->get('mail_subject_user', '');
     $mail_mode = WDW_FM_Library(self::PLUGIN)->get('mail_mode', '');
+    $mail_send_email_payment = WDW_FM_Library(self::PLUGIN)->get('mail_send_email_payment', '');
     $mail_mode_user = WDW_FM_Library(self::PLUGIN)->get('mail_mode_user', '');
     $mail_attachment = WDW_FM_Library(self::PLUGIN)->get('mail_attachment', '');
     $mail_attachment_user = WDW_FM_Library(self::PLUGIN)->get('mail_attachment_user', '');
@@ -786,6 +787,7 @@ class FMControllerManage_fm extends FMAdminController {
       'mail_subject_user' => $mail_subject_user,
       'mail_mode' => $mail_mode,
       'mail_mode_user' => $mail_mode_user,
+      'mail_send_email_payment' => $mail_send_email_payment,
       'mail_attachment' => $mail_attachment,
       'mail_attachment_user' => $mail_attachment_user,
       'script_mail_user' => $script_mail_user,
@@ -1303,6 +1305,7 @@ function after_submit() {
         'mail_subject_user' => '',
         'mail_mode' => 1,
         'mail_mode_user' => 1,
+        'mail_send_email_payment' => 1,
         'mail_attachment' => 1,
         'mail_attachment_user' => 1,
         'sortable' => $sortable,
@@ -1450,6 +1453,7 @@ function after_submit() {
       'mail_subject_user' => '',
       'mail_mode' => 1,
       'mail_mode_user' => 1,
+      'mail_send_email_payment' => 1,
       'mail_attachment' => 1,
       'mail_attachment_user' => 1,
       'sortable' => $sortable,

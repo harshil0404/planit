@@ -28,6 +28,7 @@ class FMControllerForm_maker {
 
     require_once WDFMInstance(self::PLUGIN)->plugin_dir . "/frontend/views/form_maker.php";
     $this->view = new FMViewForm_maker($this->model);
+    $this->check_payment_for_email();
   }
 
   /**
@@ -74,13 +75,36 @@ class FMControllerForm_maker {
         return;
       }
       $this->model->savedata($result[0], $id);
-
-      return $this->view->display($result, $fm_settings, $id, $type);
+      $display = $this->view->display($result, $fm_settings, $id, $type);
     }
     else {
      // Get all forms.
       $forms = $this->model->all_forms();
-      return $this->autoload_form($forms, $fm_settings);
+      $display = $this->autoload_form($forms, $fm_settings);
+    }
+
+    Cookie_fm::saveCookieValue();
+    return $display;
+  }
+
+  /**
+   * Checking if the page coming from payment and send email if need
+   * Works only when return_url is the same page
+  */
+  public function check_payment_for_email() {
+    $succes_val =  WDW_FM_Library(self::PLUGIN)->get('succes', 0, 'intval');
+    if ( $succes_val !== 0 ) {
+      $email_data = get_option('fm_email_data_'.$succes_val);
+      if ( !empty($email_data) ) {
+          $recipient = $email_data['recipient'];
+          $subject = $email_data['subject'];
+          $body = $email_data['body'];
+          $header_arr = $email_data['header_arr'];
+          $attachment_user = $email_data['attachment_user'];
+          $save_uploads = $email_data['save_uploads'];
+          WDW_FM_Library(self::PLUGIN)->mail($recipient, $subject, $body, $header_arr, $attachment_user, $save_uploads);
+          delete_option('fm_email_data_'.$succes_val);
+      }
     }
   }
 
@@ -93,18 +117,17 @@ class FMControllerForm_maker {
    */
   public function autoload_form( $forms = array(), $fm_settings = array() ) {
     $fm_forms = array();
-    WDW_FM_Library(self::PLUGIN)->start_session();
     foreach ($forms as $key => $form) {
       $display_on_this = FALSE;
       $error = 'success';
       $message = FALSE;
       $id = (int)$form->id;
       $type = $form->type;
-      if (isset($_SESSION['redirect_paypal' . $id]) && ($_SESSION['redirect_paypal' . $id] == 1)) {
-        $_SESSION['redirect_paypal' . $id] = 0;
+      if ( Cookie_fm::getCookieByKey($id, 'redirect_paypal') == 1 ) {
+        Cookie_fm::getCookieByKey($id, 'redirect_paypal', true);
       }
-      elseif (isset($_SESSION['massage_after_submit' . $id]) && $_SESSION['massage_after_submit' . $id] != '') {
-        $massage_after_submit = $_SESSION['massage_after_submit' . $id];
+      elseif ( Cookie_fm::getCookieByKey($id, 'massage_after_submit') != '' ) {
+        $massage_after_submit = Cookie_fm::getCookieByKey($id, 'massage_after_submit');
         if ($massage_after_submit) {
           $message = TRUE;
         }
@@ -174,12 +197,12 @@ class FMControllerForm_maker {
                       }
                     }
                   }
-				break;
+                break;
                 default:
                   if (in_array($current_post_type, $display_on)) {
                     $display_on_this = TRUE;
                   }
-				break;
+				        break;
               }
             }
           }
@@ -274,11 +297,11 @@ class FMControllerForm_maker {
           $param['attributes'] = '';
           $param['reset_fields'] = $reset_fields;
           foreach ( $row_values as $val ) {
-                list($input_id, $input_val) = explode('|', $val);
-                $str_key = '{'. $input_id .'}';
-                if ( strpos($params, $str_key) > -1 ) {
-                  $params = str_replace( $str_key, $input_val, $params );
-                }
+            list($input_id, $input_val) = explode('|', $val);
+            $str_key = '{'. $input_id .'}';
+            if ( strpos($params, $str_key) > -1 ) {
+              $params = str_replace( $str_key, $input_val, $params );
+            }
           }
           $html = $this->view->$type( $params, $row, $form_id, $row_id, $type, $param );
           $json[$row_id] = array('html' => $html);

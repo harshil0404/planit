@@ -59,7 +59,17 @@ class FMViewPaypal_info extends FMAdminView {
           ?>
           <tr>
             <td class="key"><?php _e('Status', WDFMInstance(self::PLUGIN)->prefix); ?></td>
-            <td><?php echo $row->status; ?></td>
+						<td>
+							<?php
+							if($row->status == "requires_capture" ){
+			 					echo $row->status = "Requires capture";
+							}elseif($row->status == "succeeded" ){
+			 					echo $row->status = "Succeeded";
+							}else {
+			 					echo $row->status = $row->status;
+							}
+							?>
+						</td>
           </tr>
           <?php
         }
