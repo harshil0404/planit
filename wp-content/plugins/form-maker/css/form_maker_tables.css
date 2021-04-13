@@ -142,7 +142,6 @@
   content: "\f160";
 }
 
-
 .wdpaypal_price_new:before {
   content: "$";
   font-weight: bolder;
@@ -578,6 +577,9 @@ div .wd-button:first-child {
   padding: 0;
 }
 
+#form_email_options_tab_content .fm-row .wd-label-radio {
+  width: auto;
+}
 .wd-label-radio {
   display: inline-block;
   max-width: 450px;
@@ -2059,6 +2061,7 @@ button:focus {
   background: #FFFFFF;
   cursor: default;
   box-shadow: 1px 1px 1px #dedede;
+  list-style: none;
 }
 
 .fm-themes-tabs ul li a {
@@ -2462,7 +2465,9 @@ button:focus {
   right: 5px;
   position: absolute;
 }
-
+.fm-input-container.wd-has-placeholder .dashicons.dashicons-list-view {
+	top: 8px;
+}
 .rtl .wd-has-placeholder .dashicons.dashicons-list-view {
   left: 5px;
   right: unset;
@@ -3000,6 +3005,7 @@ textarea[readonly] {
 }
 
 #edit_main_table input[type="text"],
+#edit_main_table input[type="number"],
 #edit_main_table textarea,
 #edit_main_table select {
   border: 0;
@@ -3363,6 +3369,8 @@ textarea[readonly] {
   padding: 10px;
   position: relative;
   width: 100%;
+  display: flex;
+  align-items: flex-end;
 }
 .wdform_row:hover,
 .wdform_row:active {
@@ -5520,11 +5528,25 @@ a.fm_not-active {
   margin: 0;
 }
 
-#form_edit_tab_content .add-popup *:not(.dashicons){
+#form_edit_tab_content .add-popup *:not(.dashicons):not(.mce-ico) {
   font-family: Segoe_UI;
 }
 
 .wd-box-content .fm-free-option select:disabled {
   background: #fff none repeat scroll 0 0!important;
   cursor: not-allowed!important;
+}
+
+.fm-notice {
+  display: flex;
+  justify-content: space-between;
+}
+
+.fm-notice-dismiss-button {
+  border: none;
+  margin: 0;
+  padding: 9px;
+  background: 0 0;
+  color: #72777c;
+  cursor: pointer;
 }

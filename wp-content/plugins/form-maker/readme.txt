@@ -2,8 +2,8 @@
 Contributors: webdorado,10web,wdsupport,formmakersupport
 Tags:  form, forms, form builder, contact form, feedback, custom form, contact, web contact form, captcha, email, form manager, survey
 Requires at least: 4.6
-Tested up to: 5.5
-Stable tag: 1.13.48
+Tested up to: 5.7
+Stable tag: 1.13.54
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -561,6 +561,54 @@ Where **{{field_id}}** is the ID of the field you wish to prefill. Also, **{{par
 
 
 == Changelog ==
+= 1.13.54 =
+*  Added: Message if there is no permission to access DB on update.
+*  Added: Option to send email to the user after payment.
+*  Added: Placeholders functionality for Reply to.
+*  Fixed: Conditional logic for Address fields.
+*  Fixed: Bug connected with "Limit of Selected Choices" option.
+*  Fixed: Regular expression for none required fields.
+*  Fixed: Use payment fields without any payment system.
+
+= 1.13.53 =
+*  Added: Option to add label for Stripe field.
+*  Added: Option to capture charge immediately or not.
+*  Fixed: Saving URLs in custom javascript.
+*  Fixed: The HTML structured labels.
+*  Fixed: Quick edit buttons in html editor for text mode.
+*  Fixed: After submission message for non-embedded forms.
+*  Fixed: Required fields message styles with hidden labels.
+
+= 1.13.52 =
+*  Improved: Use cookie instead of session.
+*  Fixed: Conflict with minifying plugins.
+*  Fixed: Email field styles.
+
+= 1.13.51 =
+*  Added: Possibility to add time field in a condition.
+*  Added: Option to hide total field currency.
+*  Added: Placeholder for submission date.
+*  Updated: Currencies list.
+*  Fixed: Styles for submissions pagination.
+*  Fixed: Editor buttons for HTML field.
+*  Fixed: Uploaded file link in generated post content.
+*  Fixed: Long labels alignment on mobiles.
+*  Fixed: Range field styles.
+*  Fixed: Styles for long text in submissions.
+*  Fixed: Viewing files in submissions.
+
+= 1.13.50 =
+*  Added: Placeholders functionality for the hidden input value.
+*  Fixed: Removing special characters from filename.
+*  Fixed: not emptying Arithmetic Captcha input field on Reset.
+*  Fixed: the position of "Other" option in Multiple Choice field.
+
+= 1.13.49 =
+*  Added: Characters limit option for Paragraph field.
+*  Added: Limitation option for multiple choice.
+*  Updated: jQuery UI library.
+*  Fixed: Scroll page only for embedded forms.
+*  Fixed: Field validation message position for a field with left-aligned labels.
 
 = 1.13.48 =
 *  Updated: Fancybox library.

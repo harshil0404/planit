@@ -620,8 +620,13 @@ class  FMViewSubmissions_fm extends FMAdminView {
 										if ( $new_file ) {
 										  $new_filename = explode('/', $new_file);
 										  $new_filename = $new_filename[count($new_filename) - 1];
-										  ?>
-										  <a target="_blank" class="fm_fancybox" rel="group_<?php echo $www; ?>" href="<?php echo $new_file; ?>"><?php echo $new_filename; ?></a>
+											$get_file_type = strstr($new_filename,  ".");
+											if($get_file_type == ".jpg" || $get_file_type == ".jpeg" || $get_file_type == ".png" || $get_file_type == ".bmp" || $get_file_type == ".svg"){
+												$fm_fancybox_class = "fm_fancybox";
+											}else {
+												$fm_fancybox_class = "";
+											}?>
+										  <a target="_blank" class="<?php echo $fm_fancybox_class;?>" rel="group_<?php echo $www; ?>" href="<?php echo $new_file; ?>"><?php echo $new_filename; ?></a>
 										  <br />
 										  <?php
 										}
@@ -711,6 +716,13 @@ class  FMViewSubmissions_fm extends FMAdminView {
 									else {
 										$element_value = str_replace("***br***", '<br>', $temp[$g]->element_value );
 										$textdata = $this->gen_shorter_text($element_value, 100);
+										if($textdata['text'] == "requires_capture" ){
+				  						$textdata['text'] = "Requires capture";
+										}elseif($textdata['text'] == "succeeded" ){
+				  						$textdata['text'] = "Succeeded";
+										}else {
+				  						$textdata['text'] = $textdata['text'];
+										}
 									  ?>
 									  <td id="<?php echo $sorted_labels_id[$h]; ?>_fc" class="<?php echo $sorted_labels_id[$h]; ?>_fc sub-align" <?php echo $styleStr; ?> data-colname="<?php echo !empty($label_name_ids[$sorted_labels_id[$h]]) ? $label_name_ids[$sorted_labels_id[$h]] : ''; ?>">
 										<p><?php echo $textdata['text']; ?></p>
@@ -732,7 +744,7 @@ class  FMViewSubmissions_fm extends FMAdminView {
 						}
 						if ( $ispaypal ) {
 						  ?>
-							<td id="payment_info_fc" class="payment_info_fc sub-align" <?php echo $style_payment_info; ?> data-colname="<?php _e('Paypal information', WDFMInstance(self::PLUGIN)->prefix); ?>">
+							<td id="payment_info_fc" class="payment_info_fc sub-align" <?php echo $style_payment_info; ?> data-colname="<?php _e('Payment information', WDFMInstance(self::PLUGIN)->prefix); ?>">
 								<a class="thickbox-preview" href="<?php echo add_query_arg(array(
 																						 'action' => 'paypal_info' . WDFMInstance(self::PLUGIN)->plugin_postfix,
 																						 'id' => $i,
@@ -740,7 +752,7 @@ class  FMViewSubmissions_fm extends FMAdminView {
 																						 'height' => '500',
                                                                                          'nonce' => $this->fm_nonce,
 																						 'TB_iframe' => '1',
-																					   ), admin_url('admin-ajax.php')); ?>" title="<?php _e("Paypal information", WDFMInstance(self::PLUGIN)->prefix); ?>">
+																					   ), admin_url('admin-ajax.php')); ?>" title="<?php _e("Payment information", WDFMInstance(self::PLUGIN)->prefix); ?>">
 								<img src="<?php echo WDFMInstance(self::PLUGIN)->plugin_url . '/images/info.png'; ?>" />
 								</a>
 							</td>
@@ -1407,7 +1419,7 @@ class  FMViewSubmissions_fm extends FMAdminView {
 										?>
 										<div class="wd-group">
 											<label class="wd-label" for="submission_<?php echo $label_id; ?>"><?php echo $labels_name[$key]; ?></label>
-											<input type="text" name="submission_<?php echo $label_id; ?>" id="submission_<?php echo $label_id; ?>" value="<?php echo str_replace("*@@url@@*", '', $element_value); ?>" size="80" />
+											<textarea name="submission_<?php echo $label_id; ?>" id="submission_<?php echo $label_id; ?>" value="<?php echo str_replace("*@@url@@*", '', $element_value); ?>" style="min-height:100px;"><?php echo str_replace("*@@url@@*", '', $element_value); ?></textarea>
 										</div>
 										<?php
 										break;

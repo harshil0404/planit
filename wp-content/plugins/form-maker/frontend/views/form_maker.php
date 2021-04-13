@@ -35,10 +35,8 @@ class FMViewForm_maker {
    */
   public function display( $result = array(), $fm_settings = array(), $form_id = 0, $formType = 'embedded' ) {
     if ( $form_id ) {
-      WDW_FM_Library(self::PLUGIN)->start_session();
-      $_SESSION['fm_empty_field_validation' . $form_id] = md5('uniqid(rand(), TRUE)');
+      Cookie_fm::setCookieValueByKey($form_id, 'fm_empty_field_validation', md5('uniqid(rand(), TRUE)'));
     }
-
     if ( $fm_settings['fm_developer_mode'] ) {
       wp_enqueue_style(WDFMInstance(self::PLUGIN)->handle_prefix . '-icons', WDFMInstance(self::PLUGIN)->plugin_url . '/css/fonts.css', array(), '1.0.1');
     }
@@ -64,7 +62,6 @@ class FMViewForm_maker {
     }
     $form_theme = $result[4];
 
-
     $theme_id = WDW_FM_Library(self::PLUGIN)->get('test_theme', $row->theme);
     if ( $theme_id == '' ) {
       $theme_id = $row->theme;
@@ -76,29 +73,28 @@ class FMViewForm_maker {
     if ( $row->payment_currency ) {
       $form_currency = WDW_FM_Library(self::PLUGIN)->replace_currency_code( $row->payment_currency );
     }
-    WDW_FM_Library(self::PLUGIN)->start_session();
     $form_maker_front_end = '';
     $form_maker_front_end .= '<div id="fm-pages' . $form_id . '" class="fm-pages wdform_page_navigation ' . $pagination_align . '" show_title="' . $row->show_title . '" show_numbers="' . $row->show_numbers . '" type="' . $row->pagination . '"></div>';
-    $form_maker_front_end .= '<form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . (((isset($_SESSION['form_submit_type' . $form_id]) && $_SESSION['form_submit_type' . $form_id]) || (isset($_SESSION['massage_after_submit' . $form_id]) && $_SESSION['massage_after_submit' . $form_id])) ? 'fm-form-submitted' : '') . '" enctype="multipart/form-data">';
+    $form_maker_front_end .= '<form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . ( Cookie_fm::getCookieByKey($form_id, 'form_submit_type') || Cookie_fm::getCookieByKey($form_id, 'massage_after_submit') ? 'fm-form-submitted' : '') . '" enctype="multipart/form-data">';
     // Form messages.
     $fm_hide_form_after_submit = 0;
     $limsub = 0;
-    if ( isset($_SESSION['form_submit_type' . $form_id]) ) {
-      $type_and_id = $_SESSION['form_submit_type' . $form_id];
+    if ( Cookie_fm::getCookieByKey($form_id, 'form_submit_type') ) {
+      $type_and_id = Cookie_fm::getCookieByKey($form_id, 'form_submit_type');
       $type_and_id = explode(',', $type_and_id);
       $form_get_type = $type_and_id[0];
       $form_get_id = isset($type_and_id[1]) ? $type_and_id[1] : '';
       $group_id = isset($type_and_id[2]) ? $type_and_id[2] : '';
-      $_SESSION['form_submit_type' . $form_id] = 0;
+      Cookie_fm::getCookieByKey($form_id, 'form_submit_type', true);
       if ( $form_get_type == 3 ) {
-        $_SESSION['massage_after_submit' . $form_id] = "";
+        Cookie_fm::getCookieByKey($form_id, 'massage_after_submit', true);
         $after_submission_text = $this->model->get_after_submission_text($form_get_id, $group_id);
         $form_maker_front_end .= WDW_FM_Library(self::PLUGIN)->message(wpautop(html_entity_decode($after_submission_text)), '', $form_id);
         $fm_hide_form_after_submit = 1;
       }
     }
-    if ( isset($_SESSION['redirect_paypal' . $form_id]) && ($_SESSION['redirect_paypal' . $form_id] == 1) ) {
-      $_SESSION['redirect_paypal' . $form_id] = 0;
+    if ( Cookie_fm::getCookieByKey($form_id, 'redirect_paypal') == 1 ) {
+      Cookie_fm::getCookieByKey($form_id, 'redirect_paypal', true);
       if ( isset($_GET['succes']) ) {
         if ( $_GET['succes'] == 0 ) {
           $form_maker_front_end .= WDW_FM_Library(self::PLUGIN)->message(__('Error, email was not sent.', WDFMInstance(self::PLUGIN)->prefix), 'fm-notice-error');
@@ -109,17 +105,17 @@ class FMViewForm_maker {
         }
       }
     }
-    elseif ( isset($_SESSION['massage_after_submit' . $form_id]) && $_SESSION['massage_after_submit' . $form_id] != "" ) {
-      $message = $_SESSION['massage_after_submit' . $form_id];
-      $_SESSION['massage_after_submit' . $form_id] = "";
-      if ( $_SESSION['error_or_no' . $form_id] ) {
+    elseif ( Cookie_fm::getCookieByKey($form_id, 'massage_after_submit') != '' ) {
+      $message = Cookie_fm::getCookieByKey($form_id, 'massage_after_submit');
+      Cookie_fm::getCookieByKey($form_id, 'massage_after_submit', true);
+      if ( Cookie_fm::getCookieByKey($form_id, 'error_or_no') ) {
         $error = 'fm-notice-error';
       }
       else {
         $error = 'fm-notice-success';
         $limsub = 1;
       }
-      if ( !isset($_SESSION['message_captcha']) || $message != $_SESSION['message_captcha'] ) {
+      if ( !Cookie_fm::getCookieByKey($form_id, 'message_captcha') || $message != Cookie_fm::getCookieByKey($form_id, 'message_captcha') ) {
         if( is_array($message) ) {
           foreach( $message as $msg ) {
             $form_maker_front_end .= WDW_FM_Library(self::PLUGIN)->message($msg, $error, $form_id);
@@ -130,25 +126,23 @@ class FMViewForm_maker {
         }
       }
     }
-    if ( isset($_SESSION['massage_after_save' . $form_id]) && $_SESSION['massage_after_save' . $form_id] != "" ) {
-      $save_message = $_SESSION['massage_after_save' . $form_id];
-      $_SESSION['massage_after_save' . $form_id] = '';
-      if ( isset($_SESSION['save_error' . $form_id]) && $_SESSION['save_error' . $form_id] == 2 ) {
+    if ( Cookie_fm::getCookieByKey($form_id, 'massage_after_save') != '' ) {
+      $save_message = Cookie_fm::getCookieByKey($form_id, 'massage_after_save');
+      Cookie_fm::getCookieByKey($form_id, 'massage_after_submit', true);
+      if ( Cookie_fm::getCookieByKey($form_id, 'save_error') == 2 ) {
         echo $save_message;
       }
       else {
-        $save_error = $_SESSION['save_error' . $form_id] ? 'fm-notice-error' : 'fm-notice-success';
+        $save_error = (Cookie_fm::getCookieByKey($form_id, 'save_error')) ? 'fm-notice-error' : 'fm-notice-success';
         $form_maker_front_end .= WDW_FM_Library(self::PLUGIN)->message($save_message, $save_error, $form_id);
       }
     }
-    if ( isset($_SESSION['show_submit_text' . $form_id]) ) {
-      if ( $_SESSION['show_submit_text' . $form_id] == 1 ) {
-        $_SESSION['show_submit_text' . $form_id] = 0;
-        $form_maker_front_end .= $row->submit_text;
-      }
+    if ( Cookie_fm::getCookieByKey($form_id, 'show_submit_text') == 1 ) {
+      Cookie_fm::getCookieByKey($form_id, 'show_submit_text', true);
+      $form_maker_front_end .= $row->submit_text;
     }
-    if ( isset($_SESSION['fm_hide_form_after_submit' . $form_id]) && $_SESSION['fm_hide_form_after_submit' . $form_id] == 1 ) {
-      $_SESSION['fm_hide_form_after_submit' . $form_id] = 0;
+    if ( Cookie_fm::getCookieByKey($form_id, 'fm_hide_form_after_submit') == 1 ) {
+      Cookie_fm::getCookieByKey($form_id, 'fm_hide_form_after_submit', true);
       $fm_hide_form_after_submit = 1;
     }
     $form_maker_front_end .= '<input type="hidden" id="counter' . $form_id . '" value="' . $row->counter . '" name="counter' . $form_id . '" />';
@@ -157,7 +151,7 @@ class FMViewForm_maker {
     if ($fm_settings['fm_antispam_bot_validation']) {
       $form_maker_front_end .= '<input type="text" class="fm-hide" id="fm_bot_validation' . $form_id . '" value="" name="fm_bot_validation' . $form_id . '" />';
     }
-    $form_maker_front_end .= '<input type="text" class="fm-hide" id="fm_empty_field_validation' . $form_id . '" value="" name="fm_empty_field_validation' . $form_id . '" data-value="'. $_SESSION['fm_empty_field_validation' . $form_id] .'" />';
+    $form_maker_front_end .= '<input type="text" class="fm-hide" id="fm_empty_field_validation' . $form_id . '" value="" name="fm_empty_field_validation' . $form_id . '" data-value="'. Cookie_fm::getCookieByKey($form_id, 'fm_empty_field_validation') .'" />';
     if (isset($fm_settings['fm_ajax_submit']) && $fm_settings['fm_ajax_submit']) {
       $form_submit_url = add_query_arg( array(
         'action' => 'fm_submit_form',
@@ -618,6 +612,21 @@ class FMViewForm_maker {
                 'w_class',
               );
             }
+						if ( strpos($temp, 'w_characters_limit') > -1 ) {
+							$params_names = array(
+							 'w_field_label_size',
+							 'w_field_label_pos',
+							 'w_hide_label',
+							 'w_size_w',
+							 'w_size_h',
+							 'w_first_val',
+							 'w_characters_limit',
+							 'w_title',
+							 'w_required',
+							 'w_unique',
+							 'w_class',
+							);
+						}
             foreach ( $params_names as $params_name ) {
               $temp = explode('*:*' . $params_name . '*:*', $temp);
               $param[$params_name] = esc_html( $temp[0] );
@@ -635,11 +644,13 @@ class FMViewForm_maker {
 
             $param['id'] = $id1;
             $param['w_size'] = $param['w_size_w'];
-
+		  			$param['w_characters_limit'] = (isset($param['w_characters_limit']) ? $param['w_characters_limit'] : "");
+		  			
             $html = '<textarea class="wd-width-100"
                       id="wdform_' . $id1 . '_element' . $form_id . '"
                       name="wdform_' . $id1 . '_element' . $form_id . '"
                       placeholder="' . $param['w_title']. '"
+                      maxlength="' . $param['w_characters_limit']. '"
                       style="height: ' . $param['w_size_h'] . 'px;"
                       ' . $param['attributes'] . '>' . $textarea_value . '</textarea>';
 
@@ -714,10 +725,10 @@ class FMViewForm_maker {
             break;
           }
           case 'type_phone_new': {
-			if ( $fm_settings['fm_developer_mode'] ) {
-				wp_enqueue_style(WDFMInstance(self::PLUGIN)->handle_prefix . '-phone_field_css');
-				wp_enqueue_script(WDFMInstance(self::PLUGIN)->handle_prefix . '-phone_field');
-			}
+            if ( $fm_settings['fm_developer_mode'] ) {
+              wp_enqueue_style(WDFMInstance(self::PLUGIN)->handle_prefix . '-phone_field_css');
+              wp_enqueue_script(WDFMInstance(self::PLUGIN)->handle_prefix . '-phone_field');
+            }
             $params_names = array(
               'w_field_label_size',
               'w_field_label_pos',
@@ -934,19 +945,19 @@ class FMViewForm_maker {
 
             $html = '';
             if ( isset($w_disabled_fields[0]) && $w_disabled_fields[0] == 'no' ) {
-              $html .= '<span class="wd-width-100 wd-address">
-                <input class="wd-width-100" type="text" id="wdform_' . $id1 . '_street1' . $form_id . '" name="wdform_' . $id1 . '_street1' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . $id1 . '_street1' . $form_id, "", 'esc_html' ) ). '" ' . $param['attributes'] . ' />
+              $html .= '<span class="wd-width-100 wd-address" id="wdform_' . $id1 . '_address_0">
+                <input class="wd-width-100 wdform_' . $id1 . '_address_0" type="text" id="wdform_' . $id1 . '_street1' . $form_id . '" name="wdform_' . $id1 . '_street1' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . $id1 . '_street1' . $form_id, "", 'esc_html' ) ). '" ' . $param['attributes'] . ' />
                 <label for="wdform_' . $id1 . '_street1' . $form_id . '" class="mini_label">' . $w_mini_labels[0] . '</label></span>';
             }
             if ( isset($w_disabled_fields[1]) && $w_disabled_fields[1] == 'no' ) {
-              $html .= '<span class="wd-width-100 wd-address">
-                <input class="wd-width-100" type="text" id="wdform_' . $id1 . '_street2' . $form_id . '" name="wdform_' . ($id1 + 1) . '_street2' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 1) . '_street2' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
+              $html .= '<span class="wd-width-100 wd-address" id="wdform_' . $id1 . '_address_1">
+                <input class="wd-width-100 wdform_' . $id1 . '_address_1" type="text" id="wdform_' . $id1 . '_street2' . $form_id . '" name="wdform_' . ($id1 + 1) . '_street2' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 1) . '_street2' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
                 <label for="wdform_' . $id1 . '_street2' . $form_id . '" class="mini_label">' . $w_mini_labels[1] . '</label></span>';
             }
             $html .= '<span class="wd-width-100 wd-flex wd-flex-row wd-flex-wrap wd-justify-content">';
             if ( isset($w_disabled_fields[2]) && $w_disabled_fields[2] == 'no' ) {
-              $html .= '<span class="wd-width-49 wd-address">
-                <input class="wd-width-100" type="text" id="wdform_' . $id1 . '_city' . $form_id . '" name="wdform_' . ($id1 + 2) . '_city' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 2) . '_city' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
+              $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_2">
+                <input class="wd-width-100 wdform_' . $id1 . '_address_2" type="text" id="wdform_' . $id1 . '_city' . $form_id . '" name="wdform_' . ($id1 + 2) . '_city' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 2) . '_city' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
                 <label for="wdform_' . $id1 . '_city' . $form_id . '" class="mini_label">' . $w_mini_labels[2] . '</label></span>';
             }
             $post_country = stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 5) . '_country' . $form_id, "", 'esc_html' ) );
@@ -961,8 +972,8 @@ class FMViewForm_maker {
                   $selected = (($w_state_key == $post_state) ? 'selected="selected"' : '');
                   $w_state_options .= '<option value="' . $w_state_key . '" ' . $selected . '>' . $w_state . '</option>';
                 }
-                $html .= '<span class="wd-width-49 wd-address">
-                <select class="wd-width-100" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" ' . $param['attributes'] . '>' . $w_state_options . '</select>
+                $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_3">
+                <select class="wd-width-100 wdform_' . $id1 . '_address_3" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" ' . $param['attributes'] . '>' . $w_state_options . '</select>
                 <label for="wdform_' . $id1 . '_state' . $form_id . '" class="mini_label wd-block" id="' . $id1 . '_mini_label_state">' . $w_mini_labels[3] . '</label></span>';
               }
               else if ( isset($w_disabled_fields[5]) && $w_disabled_fields[5] == 'no'
@@ -975,19 +986,19 @@ class FMViewForm_maker {
                   $selected = (($w_state_key == $post_state) ? 'selected="selected"' : '');
                   $w_state_options .= '<option value="' . $w_state_key . '" ' . $selected . '>' . $w_state . '</option>';
                 }
-                $html .= '<span class="wd-width-49 wd-address">
-                <select class="wd-width-100" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" ' . $param['attributes'] . '>' . $w_state_options . '</select>
+                $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_3">
+                <select class="wd-width-100 wdform_' . $id1 . '_address_3" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" ' . $param['attributes'] . '>' . $w_state_options . '</select>
                 <label for="wdform_' . $id1 . '_state' . $form_id . '" class="mini_label wd-block" id="' . $id1 . '_mini_label_state">' . $w_mini_labels[3] . '</label></span>';
               }
               else {
-                $html .= '<span class="wd-width-49 wd-address">
-                <input class="wd-width-100" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 3) . '_state' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
+                $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_3">
+                <input class="wd-width-100 wdform_' . $id1 . '_address_3" type="text" id="wdform_' . $id1 . '_state' . $form_id . '" name="wdform_' . ($id1 + 3) . '_state' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 3) . '_state' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
                 <label for="wdform_' . $id1 . '_state' . $form_id . '" class="mini_label">' . $w_mini_labels[3] . '</label></span>';
               }
             }
             if ( isset($w_disabled_fields[4]) && $w_disabled_fields[4] == 'no' ) {
-              $html .= '<span class="wd-width-49 wd-address">
-              <input class="wd-width-100" type="text" id="wdform_' . $id1 . '_postal' . $form_id . '" name="wdform_' . ($id1 + 4) . '_postal' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 4) . '_postal' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
+              $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_4">
+              <input class="wd-width-100 wdform_' . $id1 . '_address_4" type="text" id="wdform_' . $id1 . '_postal' . $form_id . '" name="wdform_' . ($id1 + 4) . '_postal' . $form_id . '" value="' . stripslashes( WDW_FM_Library(self::PLUGIN)->get( 'wdform_' . ($id1 + 4) . '_postal' . $form_id, "", 'esc_html' ) ) . '" ' . $param['attributes'] . ' />
               <label for="wdform_' . $id1 . '_postal' . $form_id . '" class="mini_label">' . $w_mini_labels[4] . '</label></span>';
             }
             if ( isset($w_disabled_fields[5]) && $w_disabled_fields[5] == 'no' ) {
@@ -1002,8 +1013,8 @@ class FMViewForm_maker {
                 }
                 $w_options .= '<option value="' . $w_country_key . '" ' . $selected . '>' . $w_country . '</option>';
               }
-              $html .= '<span class="wd-width-49 wd-address">
-              <select class="wd-width-100"
+              $html .= '<span class="wd-width-49 wd-address" id="wdform_' . $id1 . '_address_5">
+              <select class="wd-width-100 wdform_' . $id1 . '_address_5"
                       type="text"
                       id="wdform_' . $id1 . '_country' . $form_id . '"
                       name="wdform_' . ($id1 + 5) . '_country' . $form_id . '"
@@ -1255,10 +1266,9 @@ class FMViewForm_maker {
 
             // Generate field.
             $rep = $this->wdform_field($type, $param, $row, $html);
-            WDW_FM_Library(self::PLUGIN)->start_session();
-            if ( isset($_SESSION['message_captcha']) && $_SESSION['message_captcha'] != "" ) {
-              $rep .= '<div class="fm-not-filled message_captcha">' . $_SESSION['message_captcha'] . '</div>';
-              unset($_SESSION['message_captcha']);
+            if ( Cookie_fm::getCookieByKey($form_id, 'message_captcha') != "" ) {
+              $rep .= '<div class="fm-not-filled message_captcha">' . Cookie_fm::getCookieByKey($form_id, 'message_captcha') . '</div>';
+              Cookie_fm::getCookieByKey($form_id, 'message_captcha', true);
             }
 
             break;
@@ -1322,10 +1332,9 @@ class FMViewForm_maker {
 
             // Generate field.
             $rep = $this->wdform_field($type, $param, $row, $html);
-            WDW_FM_Library(self::PLUGIN)->start_session();
-            if ( isset($_SESSION['message_captcha']) && $_SESSION['message_captcha'] != "" ) {
-              $rep .= '<div class="fm-not-filled message_captcha">' . $_SESSION['message_captcha'] . '</div>';
-              unset($_SESSION['message_captcha']);
+            if ( Cookie_fm::getCookieByKey($form_id, 'message_captcha') != '' ) {
+              $rep .= '<div class="fm-not-filled message_captcha">' . Cookie_fm::getCookieByKey($form_id, 'message_captcha') . '</div>';
+              Cookie_fm::getCookieByKey($form_id, 'message_captcha', true);
             }
 
             break;
@@ -1389,13 +1398,11 @@ class FMViewForm_maker {
             $param['id'] = '';
             $param['w_class'] = 'wd-flex-row';
 
-
             // Generate field.
             $rep = $this->wdform_field($type, $param, $row, $html);
-            WDW_FM_Library(self::PLUGIN)->start_session();
-            if ( isset($_SESSION['message_captcha']) && $_SESSION['message_captcha'] != "" ) {
-              $rep .= '<div class="fm-not-filled message_captcha"' . (isset($_SESSION['recaptcha_score']) ? ' data-score="' . $_SESSION['recaptcha_score'] . '"' : '') . '>' . $_SESSION['message_captcha'] . '</div>';
-              unset($_SESSION['message_captcha']);
+            if ( Cookie_fm::getCookieByKey($form_id, 'message_captcha') != '' ) {
+              $rep .= '<div class="fm-not-filled message_captcha"' . ( (Cookie_fm::getCookieByKey($form_id, 'recaptcha_score')) ? ' data-score="' . Cookie_fm::getCookieByKey($form_id, 'recaptcha_score') . '"' : '') . '>' . Cookie_fm::getCookieByKey($form_id, 'message_captcha') . '</div>';
+              Cookie_fm::getCookieByKey($form_id, 'message_captcha', true);
             }
 
             break;
@@ -1714,11 +1721,45 @@ class FMViewForm_maker {
             break;
           }
           case 'type_stripe': {
+						$params_names = array(
+							'w_field_label_size',
+							'w_field_label_pos',
+		    			'w_size',
+		    			'w_class',
+						);
+						$temp = $params;
+						if ( strpos($temp, 'w_hide_label') > -1 ) {
+							$params_names = array(
+							 'w_field_label_size',
+							 'w_field_label_pos',
+							 'w_hide_label',
+							 'w_size',
+							 'w_class',
+							);
+						}
+						foreach ( $params_names as $params_name ) {
+							$temp = explode('*:*' . $params_name . '*:*', $temp);
+							$param[$params_name] = esc_html($temp[0]);
+		    			$temp = ( isset( $temp[1] ) ? $temp[1] : '' );
+						}
+						$param['w_field_label_pos'] = (isset($param['w_field_label_pos']) ? $param['w_field_label_pos'] : "top");
+						$param['w_class'] = (isset($param['w_class']) ? $param['w_class'] : "");
+						$param['w_class'] .= ' wd-flex-row wd-align-items-center';
+						$param['id'] = $id1;
             /* get stripe extension form */
-            $stripe_data = array('form_view' => $this, 'form' => $row, 'attributes' => $params, 'input_index' => $id1, 'form_id' => $form_id, 'html' => '');
+            $stripe_data = array(
+            	'form_view' => $this,
+							'form' => $row,
+							'attributes' => $params,
+							'input_index' => $id1,
+							'form_id' => $form_id,
+							'html' => '',
+							'general_param' => $param
+						);
             if ( WDFMInstance(self::PLUGIN)->is_free != 2 && $row->paypal_mode == 2 ) {
               $stripe_data = apply_filters('fm_addon_stripe_form_init', $stripe_data);
             }
+		  			// Generate field.
             $rep .= !empty($stripe_data['html']) ? $stripe_data['html'] : '';
             break;
           }
@@ -1806,12 +1847,14 @@ class FMViewForm_maker {
       Check if the form is after submittions
       */
       if( $limsub == 1 ) {
-        $form_maker_front_end = '<div id="fm-pages' . $form_id . '" class="fm-pages wdform_page_navigation ' . $pagination_align . '" show_title="' . $row->show_title . '" show_numbers="' . $row->show_numbers . '" type="' . $row->pagination . '"></div><form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . (((isset($_SESSION['form_submit_type' . $form_id]) && $_SESSION['form_submit_type' . $form_id]) || (isset($_SESSION['massage_after_submit' . $form_id]) && $_SESSION['massage_after_submit' . $form_id])) ? 'fm-form-submitted' : '') . '" enctype="multipart/form-data"><div class="fm-message fm-notice-success">' . __( 'Your form was successfully submitted.', WDFMInstance(self::PLUGIN)->prefix ) . '</div></form>';
-      } else {
-          if( $submissions_limit_text == '' ){
+        $form_maker_front_end = '<div id="fm-pages' . $form_id . '" class="fm-pages wdform_page_navigation ' . $pagination_align . '" show_title="' . $row->show_title . '" show_numbers="' . $row->show_numbers . '" type="' . $row->pagination . '"></div><form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . ( ( Cookie_fm::getCookieByKey($form_id, 'form_submit_type') || Cookie_fm::getCookieByKey($form_id, 'massage_after_submit') ) ? 'fm-form-submitted' : '' ) . '" enctype="multipart/form-data"><div class="fm-message fm-notice-success">' . __( 'Your form was successfully submitted.', WDFMInstance(self::PLUGIN)->prefix ) . '</div></form>';
+      }
+      else {
+        if( $submissions_limit_text == '' ){
           $form_maker_front_end = '';
-        } else {
-          $form_maker_front_end = '<div id="fm-pages' . $form_id . '" class="fm-pages wdform_page_navigation ' . $pagination_align . '" show_title="' . $row->show_title . '" show_numbers="' . $row->show_numbers . '" type="' . $row->pagination . '"></div><form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . (((isset($_SESSION['form_submit_type' . $form_id]) && $_SESSION['form_submit_type' . $form_id]) || (isset($_SESSION['massage_after_submit' . $form_id]) && $_SESSION['massage_after_submit' . $form_id])) ? 'fm-form-submitted' : '') . '" enctype="multipart/form-data"><div class="fm-message fm-notice-error">' . __( $submissions_limit_text, WDFMInstance(self::PLUGIN)->prefix ) . '</div></form>';
+        }
+        else {
+          $form_maker_front_end = '<div id="fm-pages' . $form_id . '" class="fm-pages wdform_page_navigation ' . $pagination_align . '" show_title="' . $row->show_title . '" show_numbers="' . $row->show_numbers . '" type="' . $row->pagination . '"></div><form name="form' . $form_id . '" action="' . $current_url . '" method="post" id="form' . $form_id . '" class="fm-form form' . $form_id . ' ' . $header_pos . ' ' . ( ( Cookie_fm::getCookieByKey($form_id, 'form_submit_type') || Cookie_fm::getCookieByKey($form_id, 'massage_after_submit') ) ? 'fm-form-submitted' : '' ) . '" enctype="multipart/form-data"><div class="fm-message ' . ( (Cookie_fm::getCookieByKey($form_id, 'error_or_no')) ? 'fm-notice-error' : 'fm-notice-success' ) . '">' . __( $submissions_limit_text, WDFMInstance(self::PLUGIN)->prefix ) . '</div></form>';
         }
       }
     }
@@ -1848,10 +1891,9 @@ class FMViewForm_maker {
          *  Third argument after 'or' is checking if ajax_submit option enabled and this is action after form submited
          * which keeped in $_SESSION['fm_hide_form_after_submit' . $id] variable
          */
-        WDW_FM_Library(self::PLUGIN)->start_session();
-        if ($display_on_this && $hide_mobile || ($fm_settings['fm_ajax_submit'] && isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1)) {
-          if (isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1) {
-            if ($error == 'success') {
+        if ( $display_on_this && $hide_mobile || ( $fm_settings['fm_ajax_submit'] && Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1 ) ) {
+          if ( Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1 ) {
+            if ( $error == 'success' ) {
               if ($message) {
                 $onload_js .= '
 								jQuery("#fm-form' . $id . '").css("display", "none");
@@ -1906,9 +1948,8 @@ class FMViewForm_maker {
          *  Third argument after 'or' is checking if ajax_submit option enabled and this is action after form submited
          * which keeped in $_SESSION['fm_hide_form_after_submit' . $id] variable
          */
-        WDW_FM_Library(self::PLUGIN)->start_session();
-        if ($display_on_this && $hide_mobile || ($fm_settings['fm_ajax_submit'] && isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1)) {
-          if ( isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1 ) {
+        if ($display_on_this && $hide_mobile || ( $fm_settings['fm_ajax_submit'] && Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1) ) {
+          if ( Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1 ) {
             if ( $error == 'success' ) {
               if ( $message ) {
                 $onload_js .= '
@@ -1922,8 +1963,8 @@ class FMViewForm_maker {
             }
           }
           else {
-            if ( isset($_SESSION['error_occurred' . $id]) && $_SESSION['error_occurred' . $id] == 1 ) {
-              $_SESSION['error_occurred' . $id] = 0;
+            if ( Cookie_fm::getCookieByKey($id, 'error_occurred') == 1 ) {
+              Cookie_fm::getCookieByKey($id, 'error_occurred', true);
               if ( $message ) {
                 $onload_js .= '
 									jQuery("#fm-scrollbox' . $id . '").removeClass("fm-animated fadeOutDown").addClass("fm-animated fadeInUp");
@@ -1987,10 +2028,9 @@ class FMViewForm_maker {
          *  Third argument after 'or' is checking if ajax_submit option enabled and this is action after form submited
          * which keeped in $_SESSION['fm_hide_form_after_submit' . $id] variable
          */
-        WDW_FM_Library(self::PLUGIN)->start_session();
-        if ($display_on_this && $hide_mobile || ($fm_settings['fm_ajax_submit'] && isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1)) {
-          if (isset($_SESSION['fm_hide_form_after_submit' . $id]) && $_SESSION['fm_hide_form_after_submit' . $id] == 1) {
-            if ($error == 'success') {
+        if ($display_on_this && $hide_mobile || ($fm_settings['fm_ajax_submit'] && Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1)) {
+          if ( Cookie_fm::getCookieByKey($id, 'fm_hide_form_after_submit') == 1 ) {
+            if ( $error == 'success' ) {
               if ($message) {
                 $onload_js .= '
 									jQuery("#fm-form' . $id . '").addClass("fm-hide");
@@ -2002,8 +2042,7 @@ class FMViewForm_maker {
 								';
                 if (($form_result[0]->submit_text) == ""){
                   $onload_js .= '
-                  jQuery("#closing-form' . $id . '").css("display", "none");
-                  jQuery("#fm-popover-background' . $id . '").css("display", "none");
+                  jQuery("#form' . $id . '").css("padding-top", "0");
                   ';
                 }
               }
@@ -2020,9 +2059,9 @@ class FMViewForm_maker {
             }
           }
           else {
-            if (isset($_SESSION['error_occurred' . $id]) && $_SESSION['error_occurred' . $id] == 1) {
-              $_SESSION['error_occurred' . $id] = 0;
-              if ($message) {
+            if ( Cookie_fm::getCookieByKey($id, 'error_occurred') == 1 ) {
+              Cookie_fm::getCookieByKey($id, 'error_occurred', true);
+              if ( $message ) {
                 $onload_js .= '
 									jQuery("#fm-popover-background' . $id . '").css("display", "block");
 									jQuery("#fm-popover' . $id . '").css("visibility", "");
@@ -2270,6 +2309,28 @@ class FMViewForm_maker {
         'w_class',
       );
     }
+		if ( strpos($temp, 'w_limit_choice') > -1 ) {
+			$params_names = array(
+				'w_field_label_size',
+				'w_field_label_pos',
+				'w_field_option_pos',
+				'w_hide_label',
+				'w_flow',
+				'w_choices',
+				'w_choices_checked',
+				'w_rowcol',
+				'w_limit_choice',
+				'w_limit_choice_alert',
+				'w_required',
+				'w_randomize',
+				'w_allow_other',
+				'w_allow_other_num',
+				'w_value_disabled',
+				'w_choices_value',
+				'w_choices_params',
+				'w_class',
+			);
+		}
     foreach ( $params_names as $params_name ) {
       $temp = explode('*:*' . $params_name . '*:*', $temp);
       $param[$params_name] = esc_html($temp[0]);
@@ -3841,16 +3902,17 @@ class FMViewForm_maker {
     $param['w_size'] = (isset($param['w_size']) ? $param['w_size'] : "");
     $param['w_field_label_pos'] = (isset($param['w_field_label_pos']) ? $param['w_field_label_pos'] : "top");
 
+    $param['w_limit_choice'] = (isset($param['w_limit_choice']) ? $param['w_limit_choice'] : "");
+    $param['w_limit_choice_alert'] = (isset($param['w_limit_choice_alert']) ? $param['w_limit_choice_alert'] : "You have exceeded the selection limit.");
+    $param['w_hide_total_currency'] = (isset($param['w_hide_total_currency']) ? $param['w_hide_total_currency'] : "");
+
     $classes = array('wdform-field', 'wd-width-100', 'wd-flex');
     $classes[] = ($param['w_field_label_pos'] ==  "top" ? 'wd-flex-column' : 'wd-flex-row');
-    ?><div type="<?php echo $type; ?>" class="<?php echo implode(' ', $classes); ?>"><?php
-
+    ?><div type="<?php echo $type; ?>" class="<?php echo implode(' ', $classes); ?>" <?php if($param['w_limit_choice'] !=""){ echo 'data-limit="' . $param['w_limit_choice'] . '"'; echo 'data-limit-text="' . $param['w_limit_choice_alert'] . '"'; } if($param['w_hide_total_currency'] !=""){ echo 'data-hide-currency="' . $param['w_hide_total_currency'] . '"'; } ?>><?php
     if ( $label ) {
       echo $this->field_label($param, $row);
     }
-
     echo $this->field_section($html, $param);
-
     ?></div><?php
 
     return ob_get_clean();

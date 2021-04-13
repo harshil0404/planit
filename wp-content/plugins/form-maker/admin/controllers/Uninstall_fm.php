@@ -85,6 +85,7 @@ class FMControllerUninstall_fm extends FMAdminController {
       $wpdb->prefix . 'formmaker_sessions',
       $wpdb->prefix . 'formmaker_query',
       $wpdb->prefix . 'formmaker_display_options',
+      $wpdb->prefix . 'formmaker_cookies',
     );
 
     return $tables;

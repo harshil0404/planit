@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: form_maker\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-05-02 18:46+0400\n"
-"PO-Revision-Date: 2020-03-23 11:34+0400\n"
+"PO-Revision-Date: 2021-02-18 11:31+0400\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: pl\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop;__\n"
 "X-Poedit-Basepath: ..\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.4.2\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: admin/controllers/Addons_fm.php:59
@@ -1312,7 +1312,7 @@ msgstr ""
 
 #: form-maker.php:427
 msgid "This field is an input field that accepts an email address."
-msgstr "To nie jest prawidłowy adres email."
+msgstr "To pole jest polem wejściowym, które akceptuje adres e-mail."
 
 #: form-maker.php:427
 msgid ""
@@ -1686,15 +1686,15 @@ msgstr "Twój wynik powinien być niższy niż"
 
 #: form-maker.php:760
 msgid "This is not a valid time value."
-msgstr "To nie jest prawidłowy adres email."
+msgstr "To nie jest prawidłowa wartość czasu."
 
 #: form-maker.php:761
 msgid "This is not a valid number value."
-msgstr "To nie jest prawidłowy adres email."
+msgstr "To nie jest prawidłowa wartość liczbowa."
 
 #: form-maker.php:762
 msgid "This is not a valid date value."
-msgstr "To nie jest prawidłowy adres email."
+msgstr "To nie jest prawidłowa wartość daty."
 
 #: form-maker.php:763
 #, php-format
@@ -3083,7 +3083,7 @@ msgstr ""
 
 #: frontend/models/form_maker.php:1350
 msgid "This is not a valid date format."
-msgstr "To nie jest prawidłowy adres email."
+msgstr "To nie jest prawidłowy format daty."
 
 #: frontend/models/form_maker.php:1444
 #, php-format

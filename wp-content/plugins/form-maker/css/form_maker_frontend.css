@@ -148,11 +148,13 @@ div[type="type_captcha"] .wdform-element-section * {
 	color: #FF0000 !important;
 }
 
-.fm-not-filled {
+.fm-not-filled,
+.fm-error {
 	color: #FF0000;
 	font-size: 13px;
 	width: 100%;
 	padding-left: 10px;
+	margin-top: -7px;
 }
 
 .fm-form-container {
@@ -905,6 +907,12 @@ input[type=number].wd-type-number {
 	border: 1px solid #cccccc;
 }
 
+.fm-form-container .fm-popover .fm-form {
+	padding-top: 25px;
+}
+.fm-popover-container.fm-submit-message form.fm-form {
+	padding-top: 0px;
+}
 @media screen  and (max-width: 768px) {
   .fm-form .wdform_section {
     -webkit-flex-direction: column;
@@ -994,9 +1002,17 @@ div[type="type_checkbox"] > .wdform-element-section .wd-flex.checkbox-div, div[t
 	justify-content: center;
 }
 
+.fm-form .wdform-field.wd-flex-column,
 .fm-form .wdform-field {
 	-webkit-align-items: baseline;
+	height: 100%;
 	align-items: baseline;
+	justify-content: flex-end;
+}
+
+/*for gdpr | another structure*/
+.wd-flex-column[type='type_gdpr_compliance_checkbox'], .wd-flex-column[type='type_submit_reset'] {
+	height: auto!important;
 }
 
 .fm-form .wdform-element-section,
@@ -1047,6 +1063,10 @@ div[type="type_checkbox"] > .wdform-element-section .wd-flex.checkbox-div, div[t
 
 .fm-form div[class^="div_total"] {
 	margin-bottom: 10px;
+}
+.fm-form div[class^="div_total"] span,
+.fm-form div[class^="paypal_products"] span {
+	margin-right: 5px;
 }
 
 .fm-form div[class^="paypal_tax"] {
@@ -1101,7 +1121,9 @@ div[type="type_slider"] .label {
 }
 
 .fm-form .wdform_row {
-    position: relative;
+	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 .fm-form-builder .wdform_page {
@@ -1114,6 +1136,7 @@ div[type="type_slider"] .label {
 .fm-form-builder .wdform_row {
 	flex: 1;
 	max-width: 100%;
+	line-height: 1;
 }
 .wdform_column {
 	display: flex;
@@ -1223,5 +1246,9 @@ div[type="type_slider"] .label {
 
 .StripeElement {
 	padding: 10px 12px !important;
-	margin: 10px !important;
+}
+div[type="type_stripe"] .fm-notice-error {
+	position: absolute;
+	top:-41px;
+	width:auto !important;
 }

@@ -85,6 +85,12 @@ class FMControllerCheckpaypal extends FMAdminController {
       'THB',
       'HRK',
       'PKR',
+      'KES',
+      'UGX',
+      'TZS',
+      'RWF',
+      'NGN',
+      'ZAR',
     );
     $currency_sign = array(
       '$',
@@ -112,6 +118,12 @@ class FMControllerCheckpaypal extends FMAdminController {
       '&#xe3f;',
       'kn',
       'Rs',
+      'KSh',
+      'USh',
+      'TSh',
+      'FRw',
+      '&#8358;',
+      'R',
     );
     // Checking payment currency and set new value fo currency.
     $payment_currency = !empty($form->payment_currency) ? $form->payment_currency : $form_currency;

@@ -9,10 +9,11 @@ class WDFMUpdate {
    *
    * @param $version
    */
-   //TODO. $version is undefine need set default value.
-  public static function form_maker_update($version) {
+  //TODO. $version is undefine need set default value.
+  public static function form_maker_update( $version ) {
     global $wpdb;
-    if (version_compare($version, '1.7.0') == -1) {
+    $charset_collate = $wpdb->get_charset_collate();
+    if ( version_compare($version, '1.7.0') == -1 ) {
       // Add Form Layout options.
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `reply_to_user` varchar(128) NOT NULL DEFAULT ''");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_from_name_user` varchar(128) NOT NULL DEFAULT ''");
@@ -33,7 +34,7 @@ class WDFMUpdate {
       ) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1";
       $wpdb->query($formmaker_blocked);
     }
-    if (version_compare($version, '1.7.6') == -1) {
+    if ( version_compare($version, '1.7.6') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `condition` text NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_cc` varchar(128) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_cc_user` varchar(128) NOT NULL");
@@ -45,12 +46,10 @@ class WDFMUpdate {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_mode_user` tinyint(4) NOT NULL DEFAULT '1'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_attachment` tinyint(4) NOT NULL DEFAULT '1'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_attachment_user` tinyint(4) NOT NULL DEFAULT '1'");
-
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` CHANGE `tax` `tax` float NOT NULL DEFAULT '0'");
-
       $wpdb->query('UPDATE ' . $wpdb->prefix . 'formmaker SET `mail_mode` = 1, `mail_mode_user` = 1, `mail_attachment` = 1, `mail_attachment_user` = 1');
     }
-    if (version_compare($version, '1.7.13') == -1) {
+    if ( version_compare($version, '1.7.13') == -1 ) {
       $formmaker_query = "CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "formmaker_query` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `form_id` int(11) NOT NULL,
@@ -60,7 +59,7 @@ class WDFMUpdate {
     ) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;";
       $wpdb->query($formmaker_query);
     }
-    if (version_compare($version, '1.7.20') == -1) {
+    if ( version_compare($version, '1.7.20') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `user_id_wd` varchar(220) NOT NULL DEFAULT 'administrator,'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `sortable` int(11) NOT NULL DEFAULT '1'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_submits` ADD `user_id_wd` int(11) NOT NULL DEFAULT '1'");
@@ -68,18 +67,18 @@ class WDFMUpdate {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `frontend_submit_stat_fields` text NOT NULL DEFAULT ''");
       $wpdb->query('UPDATE ' . $wpdb->prefix . 'formmaker_themes SET `css` = CONCAT(css,"\r\n.wdform_column {\r\n	border-right: none !important;\r\n }")');
     }
-    if (version_compare($version, '1.7.35') == -1) {
+    if ( version_compare($version, '1.7.35') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_emptyfields` tinyint(4) NOT NULL DEFAULT '0'");
     }
-    if (version_compare($version, '1.7.38') == -1) {
+    if ( version_compare($version, '1.7.38') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` CHANGE `form_fields` `form_fields` longtext NOT NULL");
     }
-    if (version_compare($version, '1.7.43') == -1) {
+    if ( version_compare($version, '1.7.43') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_verify` tinyint(4) NOT NULL DEFAULT '0'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_verify_expiretime` float NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_verification_post_id` int(11) NOT NULL");
     }
-    if (version_compare($version, '1.7.55') == -1) {
+    if ( version_compare($version, '1.7.55') == -1 ) {
       $formmaker_backup = "CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "formmaker_backup` (
 	  `backup_id` int(11) NOT NULL AUTO_INCREMENT,
 	  `cur` int(1) NOT NULL,
@@ -146,38 +145,34 @@ class WDFMUpdate {
 	) DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;";
       $wpdb->query($formmaker_backup);
     }
-    if (version_compare($version, '1.7.79') == -1) {
+    if ( version_compare($version, '1.7.79') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `save_uploads` tinyint(4) NOT NULL DEFAULT 1");
     }
-    if (version_compare($version, '1.7.82') == -1) {
+    if ( version_compare($version, '1.7.82') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `save_uploads` tinyint(4) NOT NULL DEFAULT 1");
     }
-    if (version_compare($version, '1.8.26') == -1) {
+    if ( version_compare($version, '1.8.26') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_submits` CHANGE `ip` `ip` varchar(128) NOT NULL");
     }
-    if (version_compare($version, '1.8.36') == -1) {
+    if ( version_compare($version, '1.8.36') == -1 ) {
       $wpdb->query("ALTER TABLE  `" . $wpdb->prefix . "formmaker_submits` CHANGE  `element_value`  `element_value` longtext NOT NULL");
     }
-    if (version_compare($version, '1.11.1') == -1) {
+    if ( version_compare($version, '1.11.1') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_title` varchar(255) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_description` text NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_image_url` varchar(255) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_image_animation` varchar(200) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_hide_image` tinyint(4) NOT NULL DEFAULT 1");
-
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_title` varchar(255) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_description` text NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_image_url` varchar(255) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_image_animation` varchar(200) NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_hide_image` tinyint(4) NOT NULL DEFAULT 1");
-
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `type` varchar(100) NOT NULL DEFAULT 'embedded' AFTER `title`");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `type` varchar(100) NOT NULL DEFAULT 'embedded' AFTER `title`");
-
       $wpdb->query("ALTER TABLE  `" . $wpdb->prefix . "formmaker_themes` CHANGE `css` `params` text NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_themes` ADD `version` tinyint(4) NOT NULL DEFAULT 1");
-
-      $wpdb->update($wpdb->prefix . 'formmaker_themes', array('default' => 0), array('default' => 1));
+      $wpdb->update($wpdb->prefix . 'formmaker_themes', array( 'default' => 0 ), array( 'default' => 1 ));
       $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `params`, `default`, `version`) VALUES ("Theme 1", \'{"GPFontFamily":"tahoma","AGPWidth":"100","AGPSPWidth":"30","AGPPadding":"","AGPMargin":"0 auto","AGPBorderColor":"#ffffff","AGPBorderType":"solid","AGPBorderWidth":"1","AGPBorderRadius":"0","AGPBoxShadow":"","HPAlign":"top","HPBGColor":"#96afab","HPWidth":"100","HTPWidth":"40","HPPadding":"10px 0","HPMargin":"","HPTextAlign":"center","HPBorderColor":"#b7b7b7","HPBorderType":"solid","HPBorderWidth":"1","HPBorderRadius":"0","HTPFontSize":"24","HTPWeight":"normal","HTPColor":"#ffffff","HDPFontSize":"15","HDPColor":"#607370","HIPAlign":"top","HIPWidth":"80","HIPHeight":"","GPBGColor":"","GPFontSize":"16","GPFontWeight":"normal","GPWidth":"100","GTPWidth":"60","GPAlign":"center","GPBackground":"","GPBackgroundRepeat":"no-repeat","GPBGPosition1":"","GPBGPosition2":"","GPBGSize1":"","GPBGSize2":"","GPColor":"#607370","GPPadding":"10px","GPMargin":"","GPBorderColor":"#ffffff","GPBorderType":"solid","GPBorderWidth":"1","GPBorderRadius":"0","GPMLFontSize":"14","GPMLFontWeight":"normal","GPMLColor":"#868686","GPMLPadding":"0px 5px 0px 0px","GPMLMargin":"0px","SEPBGColor":"","SEPPadding":"","SEPMargin":"","COPPadding":"15px 20px","COPMargin":"0px","FPWidth":"70","FPPadding":"15px 0 0 0","FPMargin":"0 auto","IPHeight":"26","IPFontSize":"14","IPFontWeight":"normal","IPBGColor":"#ffffff","IPColor":"#868686","IPPadding":"0px 5px","IPMargin":"0px","IPBorderTop":"top","IPBorderRight":"right","IPBorderBottom":"bottom","IPBorderLeft":"left","IPBorderColor":"#dfdfdf","IPBorderType":"solid","IPBorderWidth":"1","IPBorderRadius":"0","IPBoxShadow":"","SBPAppearance":"none","SBPBackground":"images/themes/drop-downs/2.png","SBPBGRepeat":"no-repeat","SBPBGPos1":"95%","SBPBGPos2":"50%","SBPBGSize1":"8%","SBPBGSize2":"32%","SCPBGColor":"#ffffff","SCPWidth":"16","SCPHeight":"16","SCPBorderTop":"top","SCPBorderRight":"right","SCPBorderBottom":"bottom","SCPBorderLeft":"left","SCPBorderColor":"#868686","SCPBorderType":"solid","SCPBorderWidth":"1","SCPMargin":"0px 3px","SCPBorderRadius":"15","SCPBoxShadow":"","SCCPBGColor":"#868686","SCCPWidth":"6","SCCPHeight":"6","SCCPMargin":"5","SCCPBorderRadius":"10","MCPBGColor":"#ffffff","MCPWidth":"16","MCPHeight":"16","MCPBorderTop":"top","MCPBorderRight":"right","MCPBorderBottom":"bottom","MCPBorderLeft":"left","MCPBorderColor":"#868686","MCPBorderType":"solid","MCPBorderWidth":"1","MCPMargin":"0px 3px","MCPBorderRadius":"0","MCPBoxShadow":"","MCCPBGColor":"","MCCPBackground":"images/themes/checkboxes/1.png","MCCPBGRepeat":"no-repeat","MCCPBGPos1":"","MCCPBGPos2":"","MCCPWidth":"16","MCCPHeight":"16","MCCPMargin":"0","MCCPBorderRadius":"0","SPAlign":"left","SPBGColor":"#e74c3c","SPWidth":"","SPHeight":"","SPFontSize":"16","SPFontWeight":"normal","SPColor":"#ffffff","SPPadding":"5px 8px","SPMargin":"0 15px 0 0","SPBorderTop":"top","SPBorderRight":"right","SPBorderBottom":"bottom","SPBorderLeft":"left","SPBorderColor":"#e74c3c","SPBorderType":"solid","SPBorderWidth":"1","SPBorderRadius":"0","SPBoxShadow":"","SHPBGColor":"#701e16","SHPColor":"#ffffff","SHPBorderTop":"top","SHPBorderRight":"right","SHPBorderBottom":"bottom","SHPBorderLeft":"left","SHPBorderColor":"#701e16","SHPBorderType":"solid","SHPBorderWidth":"1","BPBGColor":"#96afab","BPWidth":"","BPHeight":"","BPFontSize":"16","BPFontWeight":"normal","BPColor":"#ffffff","BPPadding":"5px 8px","BPMargin":"0 15px 0 0","BPBorderTop":"top","BPBorderRight":"right","BPBorderBottom":"bottom","BPBorderLeft":"left","BPBorderColor":"#8a8a8a","BPBorderType":"solid","BPBorderWidth":"1","BPBorderRadius":"0","BPBoxShadow":"","BHPBGColor":"#5a7784","BHPColor":"#ffffff","BHPBorderTop":"top","BHPBorderRight":"right","BHPBorderBottom":"bottom","BHPBorderLeft":"left","BHPBorderColor":"#5a7784","BHPBorderType":"solid","BHPBorderWidth":"1","PSAPBGColor":"#e74c3c","PSAPFontSize":"16","PSAPFontWeight":"normal","PSAPColor":"#ffffff","PSAPHeight":"","PSAPLineHeight":"","PSAPPadding":"6px","PSAPMargin":"0 1px 0 0 ","PSAPBorderTop":"top","PSAPBorderRight":
 "right","PSAPBorderBottom":"bottom","PSAPBorderLeft":"left","PSAPBorderColor":"#e74c3c","PSAPBorderType":"solid","PSAPBorderWidth":"2","PSAPBorderRadius":"0","PSDPBGColor":"#ededed","PSDPFontSize":"14","PSDPFontWeight":"normal","PSDPColor":"#737373","PSDPHeight":"","PSDPLineHeight":"","PSDPPadding":"3px 5px","PSDPMargin":"0 1px 0 0 ","PSDPBorderTop":"top","PSDPBorderRight":"right","PSDPBorderBottom":"bottom","PSDPBorderLeft":"left","PSDPBorderColor":"#ededed","PSDPBorderType":"solid","PSDPBorderWidth":"2","PSDPBorderRadius":"0","PSAPAlign":"right","PSAPWidth":"","PPAPWidth":"100%","NBPBGColor":"","NBPWidth":"","NBPHeight":"","NBPLineHeight":"","NBPColor":"#607370","NBPPadding":"4px 10px","NBPMargin":"0px","NBPBorderColor":"#777777","NBPBorderType":"solid","NBPBorderWidth":"1","NBPBorderRadius":"0","NBPBoxShadow":"","NBHPBGColor":"","NBHPColor":"#96afab","NBHPBorderColor":"#787878","NBHPBorderType":"solid","NBHPBorderWidth":"1","PBPBGColor":"","PBPWidth":"100","PBPHeight":"","PBPLineHeight":"","PBPColor":"#607370","PBPPadding":"","PBPMargin":"0px","PBPBorderColor":"#777777","PBPBorderType":"solid","PBPBorderWidth":"1","PBPBorderRadius":"0","PBPBoxShadow":"","PBHPBGColor":"","PBHPColor":"#96afab","PBHPBorderColor":"#787878","PBHPBorderType":"solid","PBHPBorderWidth":"1","CBPPosition":"absolute","CBPTop":"10px","CBPRight":"10px","CBPBottom":"","CBPLeft":"","CBPBGColor":"","CBPFontSize":"20","CBPFontWeight":"normal","CBPColor":"#777777","CBPPadding":"0px","CBPMargin":"0px","CBPBorderColor":"#ffffff","CBPBorderType":"solid","CBPBorderWidth":"1","CBPBorderRadius":"0","CBHPBGColor":"","CBHPColor":"#e74c3c","CBHPBorderColor":"#737373","CBHPBorderType":"solid","CBHPBorderWidth":"1","MBPBGColor":"#96afab","MBPFontSize":"17","MBPFontWeight":"normal","MBPColor":"#ffffff","MBPTextAlign":"center","MBPPadding":"10px","MBPMargin":"","MBPBorderTop":"top","MBPBorderRight":"right","MBPBorderBottom":"bottom","MBPBorderLeft":"left","MBPBorderColor":"#96afab","MBPBorderType":"solid","MBPBorderWidth":"2","MBPBorderRadius":"0","MBHPBGColor":"#96afab","MBHPColor":"#607370","MBHPBorderTop":"top","MBHPBorderRight":"right","MBHPBorderBottom":"bottom","MBHPBorderLeft":"left","MBHPBorderColor":"#96afab","MBHPBorderType":"solid","MBHPBorderWidth":"2","OPDeInputColor":"#afafaf","OPFontStyle":"normal","OPRColor":"#ff1313","OPDPIcon":"images/themes/date-pickers/2.png","OPDPRepeat":"no-repeat","OPDPPos1":"0%","OPDPPos2":"10%","OPDPMargin":"3px 0 0 -23px","OPFBgUrl":"images/themes/file-uploads/2.png","OPFBGRepeat":"no-repeat","OPFPos1":"0%","OPFPos2":"10%","OPGWidth":"100","CUPCSS":""}\', 1, 2);');
       $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `params`, `default`, `version`) VALUES ("Theme 2", \'{"GPFontFamily":"Roboto Condensed","AGPWidth":"100","AGPSPWidth":"30","AGPPadding":"","AGPMargin":"0 auto","AGPBorderColor":"#ffffff","AGPBorderType":"solid","AGPBorderWidth":"1","AGPBorderRadius":"0","AGPBoxShadow":"","HPAlign":"top","HPBGColor":"#16afbf","HPWidth":"100","HTPWidth":"40","HPPadding":"10px 0","HPMargin":"","HPTextAlign":"center","HPBorderColor":"#b7b7b7","HPBorderType":"solid","HPBorderWidth":"1","HPBorderRadius":"0","HTPFontSize":"25","HTPWeight":"? string:? string:? string:? string:? string:? string:? string:? string:? string:? string:? string:? string:? string:? string: ? ? ? ? ? ? ? ? ? ? ? ? ? ?","HTPColor":"#ffffff","HDPFontSize":"16","HDPColor":"#387185","HIPAlign":"top","HIPWidth":"80","HIPHeight":"","GPBGColor":"#ededed","GPFontSize":"16","GPFontWeight":"normal","GPWidth":"100","GTPWidth":"60","GPAlign":"center","GPBackground":"","GPBackgroundRepeat":"no-repeat","GPBGPosition1":"","GPBGPosition2":"","GPBGSize1":"","GPBGSize2":"","GPColor":"#387185","GPPadding":"10px","GPMargin":"","GPBorderColor":"#ffffff","GPBorderType":"solid","GPBorderWidth":"1","GPBorderRadius":"0","GPMLFontSize":"14","GPMLFontWeight":"normal","GPMLColor":"#777777","GPMLPadding":"0px 5px 0px 0px","GPMLMargin":"0px","SEPBGColor":"#ededed","SEPPadding":"","SEPMargin":"","COPPadding":"10px","COPMargin":"0px","FPWidth":"70","FPPadding":"15px 0 0 0","FPMargin":"0 auto","IPHeight":"26","IPFontSize":"14","IPFontWeight":"normal","IPBGColor":"#ffffff","IPColor":"#777777","IPPadding":"0px 5px","IPMargin":"0px","IPBorderTop":"top","IPBorderRight":"right","IPBorderBottom":"bottom","IPBorderLeft":"left","IPBorderColor":"#dfdfdf","IPBorderType":"solid","IPBorderWidth":"1","IPBorderRadius":"0","IPBoxShadow":"","SBPAppearance":"none","SBPBackground":"images/themes/drop-downs/2.png","SBPBGRepeat":"no-repeat","SBPBGPos1":"95%","SBPBGPos2":"50%","SBPBGSize1":"8%","SBPBGSize2":"32%","SCPBGColor":"#ffffff","SCPWidth":"16","SCPHeight":"16","SCPBorderTop":"top","SCPBorderRight":"right","SCPBorderBottom":"bottom","SCPBorderLeft":"left","SCPBorderColor":"#777777","SCPBorderType":"solid","SCPBorderWidth":"1","SCPMargin":"0px 3px","SCPBorderRadius":"15","SCPBoxShadow":"","SCCPBGColor":"#777777","SCCPWidth":"6","SCCPHeight":"6","SCCPMargin":"5","SCCPBorderRadius":"10","MCPBGColor":"#ffffff","MCPWidth":"16","MCPHeight":"16","MCPBorderTop":"top","MCPBorderRight":"right","MCPBorderBottom":"bottom","MCPBorderLeft":"left","MCPBorderColor":"#777777","MCPBorderType":"solid","MCPBorderWidth":"1","MCPMargin":"0px 3px","MCPBorderRadius":"0","MCPBoxShadow":"","MCCPBGColor":"","MCCPBackground":"images/themes/checkboxes/1.png","MCCPBGRepeat":"no-repeat","MCCPBGPos1":"","MCCPBGPos2":"","MCCPWidth":"16","MCCPHeight":"16","MCCPMargin":"0","MCCPBorderRadius":"0","SPAlign":"right","SPBGColor":"#a3aa44","SPWidth":"","SPHeight":"","SPFontSize":"16","SPFontWeight":"normal","SPColor":"#ffffff","SPPadding":"5px 8px","SPMargin":"0 5px 0 0 ","SPBorderTop":"top","SPBorderRight":"right","SPBorderBottom":"bottom","SPBorderLeft":"left","SPBorderColor":"#a3aa44","SPBorderType":"solid","SPBorderWidth":"1","SPBorderRadius":"0","SPBoxShadow":"1px 1px 2px #ccc","SHPBGColor":"#c2d852","SHPColor":"#445d71","SHPBorderTop":"top","SHPBorderRight":"right","SHPBorderBottom":"bottom","SHPBorderLeft":"left","SHPBorderColor":"#c2d852","SHPBorderType":"solid","SHPBorderWidth":"1","BPBGColor":"#16afbf","BPWidth":"","BPHeight":"","BPFontSize":"16","BPFontWeight":"normal","BPColor":"#ffffff","BPPadding":"5px 8px","BPMargin":"0 15px 0 0 ","BPBorderTop":"top","BPBorderRight":"right","BPBorderBottom":"bottom","BPBorderLeft":"left","BPBorderColor":"#16afbf","BPBorderType":"solid","BPBorderWidth":"1","BPBorderRadius":"0","BPBoxShadow":"1px 1px 2px #ccc","BHPBGColor":"#435c71","BHPColor":"#ffffff","BHPBorderTop":"top","BHPBorderRight":"right","BHPBorderBottom":"bottom","BHPBorderLeft":"left","BHPBorderColor":"#435c71","BHPBorderType":"solid","BHPBorderWidth":"1","PSAPBGColor"
@@ -195,7 +190,6 @@ class WDFMUpdate {
       $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `params`, `default`, `version`) VALUES ("Theme 12", \'{"GPFontFamily":"trebuchet ms","AGPWidth":"100","AGPSPWidth":"40","AGPPadding":"","AGPMargin":"0 auto","AGPBorderColor":"#ffffff","AGPBorderType":"solid","AGPBorderWidth":"1","AGPBorderRadius":"0","AGPBoxShadow":"","HPAlign":"top","HPBGColor":"#5d98b1","HPWidth":"100","HTPWidth":"40","HPPadding":"10px 15px","HPMargin":"","HPTextAlign":"left","HPBorderTop":"top","HPBorderColor":"#ffffff","HPBorderType":"solid","HPBorderWidth":"5","HPBorderRadius":"0","HTPFontSize":"22","HTPWeight":"bold","HTPColor":"#ffffff","HDPFontSize":"14","HDPColor":"#ffffff","HIPAlign":"left","HIPWidth":"80","HIPHeight":"","GPBGColor":"#36748e","GPFontSize":"15","GPFontWeight":"normal","GPWidth":"100","GTPWidth":"60","GPAlign":"center","GPBackground":"","GPBackgroundRepeat":"no-repeat","GPBGPosition1":"","GPBGPosition2":"","GPBGSize1":"","GPBGSize2":"","GPColor":"#ffffff","GPPadding":"10px","GPMargin":"","GPBorderColor":"#ffffff","GPBorderType":"solid","GPBorderWidth":"1","GPBorderRadius":"0","GPMLFontSize":"14","GPMLFontWeight":"normal","GPMLColor":"#ffffff","GPMLPadding":"0px 5px 0px 0px","GPMLMargin":"0px","SEPBGColor":"#36748e","SEPPadding":"","SEPMargin":"","COPPadding":"10px","COPMargin":"0px","FPWidth":"70","FPPadding":"15px 0 0 0","FPMargin":"0 auto","IPHeight":"28","IPFontSize":"13","IPFontWeight":"normal","IPBGColor":"#204a5c","IPColor":"#ffffff","IPPadding":"0px 5px","IPMargin":"0px","IPBorderTop":"top","IPBorderRight":"right","IPBorderBottom":"bottom","IPBorderLeft":"left","IPBorderColor":"#204a5c","IPBorderType":"solid","IPBorderWidth":"1","IPBorderRadius":"0","IPBoxShadow":"","SBPAppearance":"none","SBPBackground":"images/themes/drop-downs/2.png","SBPBGRepeat":"no-repeat","SBPBGPos1":"95%","SBPBGPos2":"50%","SBPBGSize1":"8%","SBPBGSize2":"32%","SCPBGColor":"#204a5c","SCPWidth":"14","SCPHeight":"14","SCPBorderTop":"top","SCPBorderRight":"right","SCPBorderBottom":"bottom","SCPBorderLeft":"left","SCPBorderColor":"#204a5c","SCPBorderType":"solid","SCPBorderWidth":"1","SCPMargin":"0px 3px","SCPBorderRadius":"15","SCPBoxShadow":"","SCCPBGColor":"#ffffff","SCCPWidth":"6","SCCPHeight":"6","SCCPMargin":"4","SCCPBorderRadius":"10","MCPBGColor":"#204a5c","MCPWidth":"12","MCPHeight":"12","MCPBorderTop":"top","MCPBorderRight":"right","MCPBorderBottom":"bottom","MCPBorderLeft":"left","MCPBorderColor":"#204a5c","MCPBorderType":"solid","MCPBorderWidth":"1","MCPMargin":"0px 3px","MCPBorderRadius":"0","MCPBoxShadow":"","MCCPBGColor":"#ffffff","MCCPBackground":"","MCCPBGRepeat":"no-repeat","MCCPBGPos1":"","MCCPBGPos2":"","MCCPWidth":"8","MCCPHeight":"8","MCCPMargin":"2","MCCPBorderRadius":"0","SPAlign":"left","SPBGColor":"#1e6466","SPWidth":"130","SPHeight":"28","SPFontSize":"14","SPFontWeight":"normal","SPColor":"#ffffff","SPPadding":"0px 5px","SPMargin":"0 10px 0 0","SPBorderTop":"top","SPBorderRight":"right","SPBorderBottom":"bottom","SPBorderLeft":"left","SPBorderColor":"#1e6466","SPBorderType":"solid","SPBorderWidth":"1","SPBorderRadius":"0","SPBoxShadow":"","SHPBGColor":"#268285","SHPColor":"#ffffff","SHPBorderTop":"top","SHPBorderRight":"right","SHPBorderBottom":"bottom","SHPBorderLeft":"left","SHPBorderColor":"#268285","SHPBorderType":"solid","SHPBorderWidth":"1","BPBGColor":"#d4d4d4","BPWidth":"60","BPHeight":"28","BPFontSize":"15","BPFontWeight":"normal","BPColor":"#11393a","BPPadding":"0px 5px","BPMargin":"0 15px 0 0","BPBorderTop":"top","BPBorderRight":"right","BPBorderBottom":"bottom","BPBorderLeft":"left","BPBorderColor":"#d4d4d4","BPBorderType":"solid","BPBorderWidth":"1","BPBorderRadius":"0","BPBoxShadow":"","BHPBGColor":"#f2ecde","BHPColor":"#37352f","BHPBorderTop":"top","BHPBorderRight":"right","BHPBorderBottom":"bottom","BHPBorderLeft":"left","BHPBorderColor":"#f2ecde","BHPBorderType":"solid","BHPBorderWidth":"1","PSAPBGColor":"#268285","PSAPFontSize":"14","PSAPFontWeight":"bold","PSAPColor":"#ffffff","PSAPHeight":"","PSAPLineHeight":"","PSAPPadding":"10px","PSAPMargin":"0","PSAPBorderColor":"","PSAPBorderType":"solid","PSAPBorderWidth":"4","PSAPBorderRadius":"0","PSDPBGColor":"#d4d4d4","PSDPFontSize":"14","PSDPFontWeight":"normal","PSDPColor":"#100e0e","PSDPHeight":"","PSDPLineHeight":"","PSDPPadding":"8px","PSDPMargin":"0 0 0 -3px","PSDPBorderColor":"#a3a3a3","PSDPBorderType":"solid","PSDPBorderWidth":"2","PSDPBorderRadius":"","PSAPAlign":"center","PSAPWidth":"","PPAPWidth":"100%","NBPBGColor":"","NBPWidth":"","NBPHeight":"","NBPLineHeight":"","NBPColor":"#132d39","NBPPadding":"4px 10px","NBPMargin":"0px","NBPBorderColor":"#777777","NBPBorderType":"solid","NBPBorderWidth":"1","NBPBorderRadius":"0","NBPBoxShadow":"","NBHPBGColor":"","NBHPColor":"#132d39","NBHPBorderColor":"#787878","NBHPBorderType":"solid","NBHPBorderWidth":"1","PBPBGColor":"","PBPWidth":"100","PBPHeight":"","PBPLineHeight":"","PBPColor":"#132d39","PBPPadding":"","PBPMargin":"0px","PBPBorderColor":"#777777","PBPBorderType":"solid","PBPBorderWidth":"1","PBPBorderRadius":"0","PBPBoxShadow":"","PBHPBGColor":"","PBHPColor":"#132d39","PBHPBorderColor":"#787878","PBHPBorderType":"solid","PBHPBorderWidth":"1","CBPPosition":"absolute","CBPTop":"15px","CBPRight":"6px","CBPBottom":"","CBPLeft":"","CBPBGColor":"","CBPFontSize":"18","CBPFontWeight":"normal","CBPColor":"#1e6466","CBPPadding":"0px","CBPMargin":"0px","CBPBorderColor":"#ffffff","CBPBorderType":"solid","CBPBorderWidth":"1","CBPBorderRadius":"0","CBHPBGColor":"","CBHPColor":"#204a5c","CBHPBorderColor":"#737373","CBHPBorderType":"solid","CBHPBorderWidth":"1","MBPBGColor":"#204a5c","MBPFontSize":"15","MBPFontWeight":"normal","MBPColor":"#ffffff","MBPTextAlign":"center","MBPPadding":"10px","MBPMargin":"","MBPBorderTop":"top","MBPBorderRight":"right","MBPBorderBottom":"bottom","MBPBorderLeft":"left","MBPBorderColor":"#204a5c","MBPBorderType":"solid","MBPBorderWidth":"2","MBPBorderRadius":"0","MBHPBGColor":"#5d98b1","MBHPColor":"#ffffff","MBHPBorderTop":"top","MBHPBorderRight":"right","MBHPBorderBottom":"bottom","MBHPBorderLeft":"left","MBHPBorderColor":"#5d98b1","MBHPBorderType":"solid","MBHPBorderWidth":"2","OPDeInputColor":"#ffffff","OPFontStyle":"normal","OPRColor":"#ff1313","OPDPIcon":"images/themes/date-pickers/5.png","OPDPRepeat":"no-repeat","OPDPPos1":"0%","OPDPPos2":"10%","OPDPMargin":"3px 0 0 -23px","OPFBgUrl":"images/themes/file-uploads/2.png","OPFBGRepeat":"no-repeat","OPFPos1":"0%","OPFPos2":"10%","OPGWidth":"100","CUPCSS":""}\', 0, 2);');
       $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `params`, `default`, `version`) VALUES ("Theme 13", \'{"GPFontFamily":"tahoma","AGPWidth":"100","AGPSPWidth":"20","AGPPadding":"","AGPMargin":"0 auto","AGPBorderColor":"#ffffff","AGPBorderType":"solid","AGPBorderWidth":"1","AGPBorderRadius":"0","AGPBoxShadow":"","HPAlign":"top","HPBGColor":"#43aeab","HPWidth":"100","HTPWidth":"40","HPPadding":"20px 0","HPMargin":"0","HPTextAlign":"center","HPBorderColor":"#b7b7b7","HPBorderType":"solid","HPBorderWidth":"1","HPBorderRadius":"0","HTPFontSize":"20","HTPWeight":"normal","HTPColor":"#ffffff","HDPFontSize":"13","HDPColor":"#ffffff","HIPAlign":"top","HIPWidth":"80","HIPHeight":"","GPBGColor":"#ffffff","GPFontSize":"15","GPFontWeight":"normal","GPWidth":"100","GTPWidth":"60","GPAlign":"center","GPBackground":"","GPBackgroundRepeat":"no-repeat","GPBGPosition1":"","GPBGPosition2":"","GPBGSize1":"","GPBGSize2":"","GPColor":"#676767","GPPadding":"10px 0","GPMargin":"","GPBorderColor":"#ffffff","GPBorderType":"solid","GPBorderWidth":"1","GPBorderRadius":"0","GPMLFontSize":"14","GPMLFontWeight":"normal","GPMLColor":"#9c9c9c","GPMLPadding":"0px 5px 0px 0px","GPMLMargin":"0px","SEPBGColor":"#ffffff","SEPPadding":"","SEPMargin":"","COPPadding":"15px 20px","COPMargin":"0px","FPWidth":"70","FPPadding":"15px 0 0 0","FPMargin":"0 auto","IPHeight":"28","IPFontSize":"14","IPFontWeight":"normal","IPBGColor":"#e4e4e4","IPColor":"#9a9a9a","IPPadding":"0px 5px","IPMargin":"0px","IPBorderTop":"top","IPBorderRight":"right","IPBorderBottom":"bottom","IPBorderLeft":"left","IPBorderColor":"#e4e4e4","IPBorderType":"solid","IPBorderWidth":"1","IPBorderRadius":"0","IPBoxShadow":"","SBPAppearance":"none","SBPBackground":"images/themes/drop-downs/2.png","SBPBGRepeat":"no-repeat","SBPBGPos1":"95%","SBPBGPos2":"50%","SBPBGSize1":"8%","SBPBGSize2":"32%","SCPBGColor":"#ffffff","SCPWidth":"16","SCPHeight":"16","SCPBorderTop":"top","SCPBorderRight":"right","SCPBorderBottom":"bottom","SCPBorderLeft":"left","SCPBorderColor":"#868686","SCPBorderType":"solid","SCPBorderWidth":"1","SCPMargin":"0px 3px","SCPBorderRadius":"15","SCPBoxShadow":"","SCCPBGColor":"#868686","SCCPWidth":"6","SCCPHeight":"6","SCCPMargin":"5","SCCPBorderRadius":"10","MCPBGColor":"#ffffff","MCPWidth":"16","MCPHeight":"16","MCPBorderTop":"top","MCPBorderRight":"right","MCPBorderBottom":"bottom","MCPBorderLeft":"left","MCPBorderColor":"#868686","MCPBorderType":"solid","MCPBorderWidth":"1","MCPMargin":"0px 3px","MCPBorderRadius":"0","MCPBoxShadow":"","MCCPBGColor":"","MCCPBackground":"images/themes/checkboxes/1.png","MCCPBGRepeat":"no-repeat","MCCPBGPos1":"","MCCPBGPos2":"","MCCPWidth":"16","MCCPHeight":"16","MCCPMargin":"0","MCCPBorderRadius":"0","SPAlign":"left","SPBGColor":"#f38989","SPWidth":"","SPHeight":"","SPFontSize":"16","SPFontWeight":"normal","SPColor":"#ffffff","SPPadding":"5px 8px","SPMargin":"0","SPBorderTop":"top","SPBorderRight":"right","SPBorderBottom":"bottom","SPBorderLeft":"left","SPBorderColor":"#f38989","SPBorderType":"solid","SPBorderWidth":"1","SPBorderRadius":"0","SPBoxShadow":"","SHPBGColor":"#c17777","SHPColor":"#ffffff","SHPBorderTop":"top","SHPBorderRight":"right","SHPBorderBottom":"bottom","SHPBorderLeft":"left","SHPBorderColor":"#c17777","SHPBorderType":"solid","SHPBorderWidth":"1","BPBGColor":"#ffffff","BPWidth":"","BPHeight":"","BPFontSize":"16","BPFontWeight":"normal","BPColor":"#8c8c8c","BPPadding":"5px 8px","BPMargin":"0 15px 0 0","BPBorderTop":"top","BPBorderRight":"right","BPBorderBottom":"bottom","BPBorderLeft":"left","BPBorderColor":"#43aeab","BPBorderType":"solid","BPBorderWidth":"1","BPBorderRadius":"0","BPBoxShadow":"","BHPBGColor":"#43aeab","BHPColor":"#ffffff","BHPBorderTop":"top","BHPBorderRight":"right","BHPBorderBottom":"bottom","BHPBorderLeft":"left","BHPBorderColor":"#787878","BHPBorderType":"solid","BHPBorderWidth":"1","PSAPBGColor":"#f38989","PSAPFontSize":"16","PSAPFontWeight":"normal","PSAPColor":"#ffffff","PSAPHeight":"","PSAPLineHeight":"","PSAPPadding":"6px","PSAPMargin":"0 0 4px 0 ","PSAPBorderTop":"top","PSAPBorderRight":"right","PSAPBorderBottom":"bottom","PSAPBorderLeft":"left","PSAPBorderColor":"#f38989","PSAPBorderType":"solid","PSAPBorderWidth":"2","PSAPBorderRadius":"0","PSDPBGColor":"#a5a5a5","PSDPFontSize":"16","PSDPFontWeight":"normal","PSDPColor":"#ffffff","PSDPHeight":"","PSDPLineHeight":"","PSDPPadding":"2px 4px","PSDPMargin":"0 0 0 -3px","PSDPBorderTop":"top","PSDPBorderRight":"right","PSDPBorderBottom":"bottom","PSDPBorderLeft":"left","PSDPBorderColor":"#a3a3a3","PSDPBorderType":"solid","PSDPBorderWidth":"2","PSDPBorderRadius":"0","PSAPAlign":"right","PSAPWidth":"","PPAPWidth":"100%","NBPBGColor":"","NBPWidth":"","NBPHeight":"","NBPLineHeight":"","NBPColor":"#43aeab","NBPPadding":"4px 10px","NBPMargin":"0px","NBPBorderColor":"#777777","NBPBorderType":"solid","NBPBorderWidth":"1","NBPBorderRadius":"0","NBPBoxShadow":"","NBHPBGColor":"","NBHPColor":"#777777","NBHPBorderColor":"#787878","NBHPBorderType":"solid","NBHPBorderWidth":"1","PBPBGColor":"","PBPWidth":"100","PBPHeight":"","PBPLineHeight":"","PBPColor":"#43aeab","PBPPadding":"","PBPMargin":"0px","PBPBorderColor":"#777777","PBPBorderType":"solid","PBPBorderWidth":"1","PBPBorderRadius":"0","PBPBoxShadow":"","PBHPBGColor":"","PBHPColor":"#777777","PBHPBorderColor":"#787878","PBHPBorderType":"solid","PBHPBorderWidth":"1","CBPPosition":"absolute","CBPTop":"10px","CBPRight":"10px","CBPBottom":"","CBPLeft":"","CBPBGColor":"","CBPFontSize":"18","CBPFontWeight":"normal","CBPColor":"#ffffff","CBPPadding":"0px","CBPMargin":"0px","CBPBorderColor":"#ffffff","CBPBorderType":"solid","CBPBorderWidth":"1","CBPBorderRadius":"0","CBHPBGColor":"","CBHPColor":"#f38989","CBHPBorderColor":"#737373","CBHPBorderType":"solid","CBHPBorderWidth":"1","MBPBGColor":"#b7b7b7","MBPFontSize":"17","MBPFontWeight":"normal","MBPColor":"#ffffff","MBPTextAlign":"center","MBPPadding":"10px","MBPMargin":"","MBPBorderTop":"top","MBPBorderRight":"right","MBPBorderBottom":"bottom","MBPBorderLeft":"left","MBPBorderColor":"#8f8f8f","MBPBorderType":"solid","MBPBorderWidth":"2","MBPBorderRadius":"0","MBHPBGColor":"#ffffff","MBHPColor":"#8f8f8f","MBHPBorderTop":"top","MBHPBorderRight":"right","MBHPBorderBottom":"bottom","MBHPBorderLeft":"left","MBHPBorderColor":"#8f8f8f","MBHPBorderType":"solid","MBHPBorderWidth":"2","OPDeInputColor":"#aeaeae","OPFontStyle":"normal","OPRColor":"#cf1515","OPDPIcon":"images/themes/date-pickers/5.png","OPDPRepeat":"no-repeat","OPDPPos1":"0%","OPDPPos2":"10%","OPDPMargin":"3px 0 0 -23px","OPFBgUrl":"images/themes/file-uploads/2.png","OPFBGRepeat":"no-repeat","OPFPos1":"0%","OPFPos2":"10%","OPGWidth":"100","CUPCSS":".mwd-header-text { padding: 15px 15px 0; }"}\', 0, 2);');
       $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `params`, `default`, `version`) VALUES ("Theme 14", \'{"GPFontFamily":"tahoma","AGPWidth":"100","AGPSPWidth":"40","AGPPadding":"","AGPMargin":"0 auto","AGPBorderColor":"#ffffff","AGPBorderType":"solid","AGPBorderWidth":"1","AGPBorderRadius":"0","AGPBoxShadow":"","HPAlign":"top","HPBGColor":"#386f74","HPWidth":"100","HTPWidth":"26","HPPadding":"0 20px","HPMargin":"","HPTextAlign":"center","HPBorderColor":"#b7b7b7","HPBorderType":"solid","HPBorderWidth":"1","HPBorderRadius":"0","HTPFontSize":"19","HTPWeight":"normal","HTPColor":"#ffffff","HDPFontSize":"13","HDPColor":"#ffffff","HIPAlign":"left","HIPWidth":"40","HIPHeight":"","GPBGColor":"#5dbac2","GPFontSize":"15","GPFontWeight":"normal","GPWidth":"100","GTPWidth":"74","GPAlign":"center","GPBackground":"","GPBackgroundRepeat":"no-repeat","GPBGPosition1":"","GPBGPosition2":"","GPBGSize1":"","GPBGSize2":"","GPColor":"#ffffff","GPPadding":"0","GPMargin":"","GPBorderColor":"#ffffff","GPBorderType":"solid","GPBorderWidth":"1","GPBorderRadius":"0","GPMLFontSize":"14","GPMLFontWeight":"normal","GPMLColor":"#ffffff","GPMLPadding":"0px 5px 0px 0px","GPMLMargin":"0px","SEPBGColor":"#5dbac2","SEPPadding":"","SEPMargin":"","COPPadding":"15px 20px","COPMargin":"0px","FPWidth":"70","FPPadding":"15px 0 0 0","FPMargin":"0 auto","IPHeight":"28","IPFontSize":"13","IPFontWeight":"normal","IPBGColor":"#ffffff","IPColor":"#868686","IPPadding":"0px 5px","IPMargin":"0px","IPBorderTop":"top","IPBorderRight":"right","IPBorderBottom":"bottom","IPBorderLeft":"left","IPBorderColor":"#ffffff","IPBorderType":"solid","IPBorderWidth":"1","IPBorderRadius":"0","IPBoxShadow":"","SBPAppearance":"none","SBPBackground":"images/themes/drop-downs/2.png","SBPBGRepeat":"no-repeat","SBPBGPos1":"95%","SBPBGPos2":"50%","SBPBGSize1":"8%","SBPBGSize2":"32%","SCPBGColor":"#ffffff","SCPWidth":"16","SCPHeight":"16","SCPBorderTop":"top","SCPBorderRight":"right","SCPBorderBottom":"bottom","SCPBorderLeft":"left","SCPBorderColor":"#868686","SCPBorderType":"solid","SCPBorderWidth":"1","SCPMargin":"0px 3px","SCPBorderRadius":"15","SCPBoxShadow":"","SCCPBGColor":"#868686","SCCPWidth":"6","SCCPHeight":"6","SCCPMargin":"5","SCCPBorderRadius":"10","MCPBGColor":"#ffffff","MCPWidth":"16","MCPHeight":"16","MCPBorderTop":"top","MCPBorderRight":"right","MCPBorderBottom":"bottom","MCPBorderLeft":"left","MCPBorderColor":"#868686","MCPBorderType":"solid","MCPBorderWidth":"1","MCPMargin":"0px 3px","MCPBorderRadius":"0","MCPBoxShadow":"","MCCPBGColor":"","MCCPBackground":"images/themes/checkboxes/1.png","MCCPBGRepeat":"no-repeat","MCCPBGPos1":"","MCCPBGPos2":"","MCCPWidth":"16","MCCPHeight":"16","MCCPMargin":"0","MCCPBorderRadius":"0","SPAlign":"right","SPBGColor":"#f6c37a","SPWidth":"","SPHeight":"","SPFontSize":"14","SPFontWeight":"normal","SPColor":"#ffffff","SPPadding":"5px 15px","SPMargin":"0 15px 0 0","SPBorderBottom":"bottom","SPBorderColor":"#ffffff","SPBorderType":"solid","SPBorderWidth":"3","SPBorderRadius":"0","SPBoxShadow":"","SHPBGColor":"#f4b459","SHPColor":"#ffffff","SHPBorderBottom":"bottom","SHPBorderColor":"#ffffff","SHPBorderType":"solid","SHPBorderWidth":"3","BPBGColor":"#5dbac2","BPWidth":"","BPHeight":"","BPFontSize":"14","BPFontWeight":"normal","BPColor":"#ffffff","BPPadding":"5px 8px","BPMargin":"0 15px 0 0","BPBorderColor":"#ffffff","BPBorderType":"solid","BPBorderWidth":"3","BPBorderRadius":"0","BPBoxShadow":"","BHPBGColor":"#5dbac2","BHPColor":"#ffffff","BHPBorderColor":"#ffffff","BHPBorderType":"solid","BHPBorderWidth":"1","PSAPBGColor":"#e74c3c","PSAPFontSize":"16","PSAPFontWeight":"normal","PSAPColor":"#ffffff","PSAPHeight":"","PSAPLineHeight":"","PSAPPadding":"8px","PSAPMargin":"0 0 4px 0 ","PSAPBorderTop":"top","PSAPBorderRight":"right","PSAPBorderBottom":"bottom","PSAPBorderLeft":"left","PSAPBorderColor":"#e74c3c","PSAPBorderType":"solid","PSAPBorderWidth":"2","PSAPBorderRadius":"3","PSDPBGColor":"#a5a5a5","PSDPFontSize":"16","PSDPFontWeight":"normal","PSDPColor":"#ffffff","PSDPHeight":"","PSDPLineHeight":"","PSDPPadding":"4px 6px","PSDPMargin":"0 0 0 -3px","PSDPBorderTop":"top","PSDPBorderRight":"right","PSDPBorderBottom":"bottom","PSDPBorderLeft":"left","PSDPBorderColor":"#a3a3a3","PSDPBorderType":"solid","PSDPBorderWidth":"2","PSDPBorderRadius":"3","PSAPAlign":"right","PSAPWidth":"","PPAPWidth":"100%","NBPBGColor":"","NBPWidth":"","NBPHeight":"","NBPLineHeight":"","NBPColor":"#e74c3c","NBPPadding":"4px 10px","NBPMargin":"0px","NBPBorderColor":"#777777","NBPBorderType":"solid","NBPBorderWidth":"1","NBPBorderRadius":"0","NBPBoxShadow":"","NBHPBGColor":"","NBHPColor":"#2d4d5f","NBHPBorderColor":"#787878","NBHPBorderType":"solid","NBHPBorderWidth":"1","PBPBGColor":"","PBPWidth":"100","PBPHeight":"","PBPLineHeight":"","PBPColor":"#9c9c9c","PBPPadding":"","PBPMargin":"0px","PBPBorderColor":"#777777","PBPBorderType":"solid","PBPBorderWidth":"1","PBPBorderRadius":"0","PBPBoxShadow":"","PBHPBGColor":"","PBHPColor":"#2d4d5f","PBHPBorderColor":"#787878","PBHPBorderType":"solid","PBHPBorderWidth":"1","CBPPosition":"absolute","CBPTop":"22px","CBPRight":"10px","CBPBottom":"","CBPLeft":"","CBPBGColor":"","CBPFontSize":"20","CBPFontWeight":"normal","CBPColor":"#ffffff","CBPPadding":"0px","CBPMargin":"0px","CBPBorderColor":"#f6c37a","CBPBorderType":"solid","CBPBorderWidth":"1","CBPBorderRadius":"0","CBHPBGColor":"","CBHPColor":"#f6c37a","CBHPBorderColor":"#737373","CBHPBorderType":"solid","CBHPBorderWidth":"1","MBPBGColor":"#386f74","MBPFontSize":"15","MBPFontWeight":"normal","MBPColor":"#ffffff","MBPTextAlign":"center","MBPPadding":"10px","MBPMargin":"","MBPBorderTop":"top","MBPBorderRight":"right","MBPBorderBottom":"bottom","MBPBorderLeft":"left","MBPBorderColor":"#386f74","MBPBorderType":"solid","MBPBorderWidth":"2","MBPBorderRadius":"0","MBHPBGColor":"#5dbac2","MBHPColor":"#ffffff","MBHPBorderTop":"top","MBHPBorderRight":"right","MBHPBorderBottom":"bottom","MBHPBorderLeft":"left","MBHPBorderColor":"#5dbac2","MBHPBorderType":"solid","MBHPBorderWidth":"2","OPDeInputColor":"#afafaf","OPFontStyle":"normal","OPRColor":"#386f74","OPDPIcon":"images/themes/date-pickers/2.png","OPDPRepeat":"no-repeat","OPDPPos1":"0%","OPDPPos2":"10%","OPDPMargin":"3px 0 0 -23px","OPFBgUrl":"images/themes/file-uploads/2.png","OPFBGRepeat":"no-repeat","OPFPos1":"0%","OPFPos2":"10%","OPGWidth":"100","CUPCSS":""}\', 0, 2);');
-
       $formmaker_display_options = "CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "formmaker_display_options` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `form_id` int(11) NOT NULL UNIQUE,
@@ -226,28 +220,66 @@ class WDFMUpdate {
     )DEFAULT CHARSET=utf8;";
       $wpdb->query($formmaker_display_options);
     }
-    if (version_compare($version, '1.11.3') == -1) {
+    if ( version_compare($version, '1.11.3') == -1 ) {
       $wpdb->query("ALTER TABLE  `" . $wpdb->prefix . "formmaker_themes` CHANGE `params` `css` text NOT NULL");
     }
-    if (version_compare($version, '1.12.0') == -1) {
+    if ( version_compare($version, '1.12.0') == -1 ) {
       $wpdb->query("ALTER TABLE " . $wpdb->prefix . "formmaker ADD `jsversion` int(11) NOT NULL");
     }
-    if (version_compare($version, '1.12.5') == -1) {
-	    $default = json_encode(array('AGPWidth' => '70', 'AGPSPWidth' => '30', 'HPAlign' => 'top', 'HTPWidth' => '40', 'HPTextAlign' => 'center', 'HTPFontSize' => '24', 'HDPFontSize' => '15', 'HIPAlign' => 'top', 'HIPWidth' => '80', 'GPWidth' => '100', 'GTPWidth' => '60', 'SPAlign' => 'left', 'PSAPAlign' => 'right', 'PPAPWidth' => '100%', 'CBPPosition' => 'absolute', 'CBPTop' => '10px', 'CBPRight' => '10px', 'PSAPBGColor' =>'#7f7f7f', 'PSAPPadding' => '8px', 'PSDPBGColor' => '#999999', 'PSDPPadding' => '4px 6px', 'PSDPMargin' => '0 0 10px 0', 'FPMargin' => '15px 0 0 0', 'IPHeight' =>'40', 'IPFontSize' => '16', 'IPPadding' => '6px 10px', 'IPBorderTop' => 'top', 'IPBorderRight' => 'right', 'IPBorderBottom' => 'bottom', 'IPBorderLeft' => 'left', 'IPBorderColor' => '#dfdfdf', 'IPBorderType' => 'solid', 'IPBorderWidth' => '1', 'IPBorderRadius' => '2', 'GPMLFontSize' => '12', 'GPMLFontWeight' => 'normal', 'OPRColor' => '' ));
-	    $wpdb->update($wpdb->prefix . 'formmaker_themes', array('default' => 0), array('default' => 1));
-	    $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `css`, `default`, `version`) VALUES ("Default Theme", \''. $default .'\', 1, 2);');
-	  }
-    if (version_compare($version, '1.12.12') == -1) {
+    if ( version_compare($version, '1.12.5') == -1 ) {
+      $default = json_encode(array(
+                               'AGPWidth' => '70',
+                               'AGPSPWidth' => '30',
+                               'HPAlign' => 'top',
+                               'HTPWidth' => '40',
+                               'HPTextAlign' => 'center',
+                               'HTPFontSize' => '24',
+                               'HDPFontSize' => '15',
+                               'HIPAlign' => 'top',
+                               'HIPWidth' => '80',
+                               'GPWidth' => '100',
+                               'GTPWidth' => '60',
+                               'SPAlign' => 'left',
+                               'PSAPAlign' => 'right',
+                               'PPAPWidth' => '100%',
+                               'CBPPosition' => 'absolute',
+                               'CBPTop' => '10px',
+                               'CBPRight' => '10px',
+                               'PSAPBGColor' => '#7f7f7f',
+                               'PSAPPadding' => '8px',
+                               'PSDPBGColor' => '#999999',
+                               'PSDPPadding' => '4px 6px',
+                               'PSDPMargin' => '0 0 10px 0',
+                               'FPMargin' => '15px 0 0 0',
+                               'IPHeight' => '40',
+                               'IPFontSize' => '16',
+                               'IPPadding' => '6px 10px',
+                               'IPBorderTop' => 'top',
+                               'IPBorderRight' => 'right',
+                               'IPBorderBottom' => 'bottom',
+                               'IPBorderLeft' => 'left',
+                               'IPBorderColor' => '#dfdfdf',
+                               'IPBorderType' => 'solid',
+                               'IPBorderWidth' => '1',
+                               'IPBorderRadius' => '2',
+                               'GPMLFontSize' => '12',
+                               'GPMLFontWeight' => 'normal',
+                               'OPRColor' => '',
+                             ));
+      $wpdb->update($wpdb->prefix . 'formmaker_themes', array( 'default' => 0 ), array( 'default' => 1 ));
+      $wpdb->query('INSERT INTO `' . $wpdb->prefix . 'formmaker_themes` (`title`, `css`, `default`, `version`) VALUES ("Default Theme", \'' . $default . '\', 1, 2);');
+    }
+    if ( version_compare($version, '1.12.12') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` CHANGE `mail` `mail` longtext NOT NULL");
     }
-    if (version_compare($version, '1.12.21') == -1) {
+    if ( version_compare($version, '1.12.21') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` CHANGE `label_order` `label_order` longtext NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` CHANGE `label_order_current` `label_order_current` longtext NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` CHANGE `label_order` `label_order` longtext NOT NULL");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` CHANGE `label_order_current` `label_order_current` longtext NOT NULL");
     }
-    if (version_compare($version, '1.12.22') == -1) {
-      $group_id = $wpdb->get_var( 'SELECT MAX( group_id ) FROM ' . $wpdb->prefix . 'formmaker_submits' );
+    if ( version_compare($version, '1.12.22') == -1 ) {
+      $group_id = $wpdb->get_var('SELECT MAX( group_id ) FROM ' . $wpdb->prefix . 'formmaker_submits');
       $group_id++;
       $formmaker_groups = "CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "formmaker_groups` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -255,35 +287,62 @@ class WDFMUpdate {
       ) DEFAULT CHARSET=utf8 AUTO_INCREMENT=" . $group_id;
       $wpdb->query($formmaker_groups);
     }
-    if (version_compare($version, '1.12.31') == -1) {
+
+    if ( version_compare($version, '1.12.31') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `privacy` text NOT NULL DEFAULT ''");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `privacy` text NOT NULL DEFAULT ''");
     }
-
-    if (version_compare($version, '1.13.0') == -1) {
+    if ( version_compare($version, '1.13.0') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `header_hide` tinyint(4) NOT NULL DEFAULT '1'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `header_hide` tinyint(4) NOT NULL DEFAULT '1'");
     }
-    if (version_compare($version, '1.13.7') == -1) {
+    if ( version_compare($version, '1.13.7') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `date` int(10) NOT NULL");
     }
-    if (version_compare($version, '1.13.21') == -1) {
+    if ( version_compare($version, '1.13.21') == -1 ) {
       $wp_upload_dir = wp_upload_dir();
       $js_dir = $wp_upload_dir['basedir'] . '/form-maker-frontend/js';
       if ( is_dir($js_dir) ) {
-        array_map( 'unlink', glob("$js_dir/*.js") );
+        array_map('unlink', glob("$js_dir/*.js"));
       }
       $css_dir = $wp_upload_dir['basedir'] . '/form-maker-frontend/css';
       if ( is_dir($js_dir) ) {
-        array_map( 'unlink', glob("$css_dir/*.css") );
+        array_map('unlink', glob("$css_dir/*.css"));
       }
     }
-    if (version_compare($version, '1.13.34') == -1) {
+    if ( version_compare($version, '1.13.34') == -1 ) {
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `submissions_limit` int(11) NOT NULL DEFAULT '0'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `submissions_limit_text` text NOT NULL");
-
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `submissions_limit` int(11) NOT NULL DEFAULT '0'");
       $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `submissions_limit_text` text NOT NULL");
+    }
+    if ( version_compare($version, '1.13.52') == -1 ) {
+      $formmaker_cookies = 'CREATE TABLE IF NOT EXISTS `' . $wpdb->prefix . 'formmaker_cookies` (
+                              `id` int(11) NOT NULL AUTO_INCREMENT,
+                              `cookie_id` varchar(32) NOT NULL,
+                              `value` text NOT NULL,
+                              PRIMARY KEY (`id`)
+                            ) ' . $charset_collate . ';';
+      $wpdb->query($formmaker_cookies);
+    }
+    if (version_compare($version, '1.13.54') == -1) {
+      $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker` ADD `mail_send_email_payment` tinyint(4) NOT NULL DEFAULT '1'");
+      $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "formmaker_backup` ADD `mail_send_email_payment` tinyint(4) NOT NULL DEFAULT '1'");
+    }
+
+    ob_start();
+    $wpdb->show_errors();
+    $wpdb->print_error();
+    $error = ob_get_clean();
+    if ( strpos($error, 'ALTER command denied') && strpos($error, '_formmaker') ) {
+      update_option('fm_alter_table_privilege', 0);
+      if (FALSE === get_option("fm_alter_table_notice")) {
+        update_option('fm_alter_table_notice', 1);
+      }
+    }
+    else {
+      update_option('fm_alter_table_privilege', 1);
+      update_option('fm_alter_table_notice', 0);
     }
     return;
   }

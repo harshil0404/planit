@@ -3,7 +3,7 @@
  * Plugin Name: Form Maker
  * Plugin URI: https://10web.io/plugins/wordpress-form-maker/?utm_source=form_maker&utm_medium=free_plugin
  * Description: This plugin is a modern and advanced tool for easy and fast creating of a WordPress Form. The backend interface is intuitive and user friendly which allows users far from scripting and programming to create WordPress Forms.
- * Version: 1.13.48
+ * Version: 1.13.54
  * Author: 10Web Form Builder Team
  * Author URI: https://10web.io/plugins/?utm_source=form_maker&utm_medium=free_plugin
  * License: GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
@@ -82,7 +82,10 @@ final class WDFM {
   public function __construct() {
     $this->define_constants();
     require_once($this->plugin_dir . '/framework/WDW_FM_Library.php');
-    if (is_admin()) {
+    require_once($this->plugin_dir . '/framework/Cookie.php');
+    $FMCookie = new Cookie_fm();
+
+    if ( is_admin() ) {
       require_once(wp_normalize_path($this->plugin_dir . '/admin/controllers/controller.php'));
       require_once(wp_normalize_path($this->plugin_dir . '/admin/models/model.php'));
       require_once(wp_normalize_path($this->plugin_dir . '/admin/views/view.php'));
@@ -98,8 +101,8 @@ final class WDFM {
     $this->plugin_url = plugins_url(plugin_basename(dirname(__FILE__)));
     $this->front_urls = $this->get_front_urls();
     $this->main_file = plugin_basename(__FILE__);
-    $this->plugin_version = '1.13.48';
-    $this->db_version = '2.13.48';
+    $this->plugin_version = '1.13.54';
+    $this->db_version = '2.13.54';
     $this->menu_postfix = ($this->is_free == 2 ? '_fmc' : '_fm');
     $this->plugin_postfix = ($this->is_free == 2 ? '_fmc' : '');
     $this->menu_slug = 'manage' . $this->menu_postfix;
@@ -126,14 +129,14 @@ final class WDFM {
       $this->fm_settings['fm_block_ip_exceeded_limit'] = 0;
     }
     if ( empty($this->fm_settings['fm_developer_mode']) ) {
-        $this->fm_settings['fm_developer_mode'] = 0;
-      }
+      $this->fm_settings['fm_developer_mode'] = 0;
+    }
     if ( empty($this->fm_settings['fm_file_read']) ) {
-        $this->fm_settings['fm_file_read'] = 0;
-      }
+      $this->fm_settings['fm_file_read'] = 0;
+    }
     if ( empty($this->fm_settings['fm_ajax_submit']) ) {
-        $this->fm_settings['fm_ajax_submit'] = 0;
-      }
+      $this->fm_settings['fm_ajax_submit'] = 0;
+    }
   }
 
   /**
@@ -266,12 +269,51 @@ final class WDFM {
     // Divi frontend builder assets.
     add_action('et_fb_enqueue_assets', array($this, 'enqueue_divi_bulder_assets'));
     add_action('et_fb_enqueue_assets', array($this, 'form_maker_admin_ajax'));
-
+    add_action('fm_admin_container_ready', array($this, 'check_alter_table_privilege'), 99);
+    add_action( 'wp_ajax_dismiss_alter_table_notice', array($this, 'dismiss_alter_table_notice_callback') );
     if ( $this->is_free == 1 ) {
       /* Add wordpress.org support custom link in plugin page */
       add_filter('plugin_action_links_' . plugin_basename(__FILE__), array( $this, 'add_ask_question_links' ));
     }
   }
+  public function check_alter_table_privilege() {
+    require_once $this->plugin_dir . "/form_maker_update.php";
+    $version = substr_replace(get_option("wd_form_maker_version"), '1.', 0, 2);
+    if ( get_option('fm_alter_table_privilege') == '0' ) {
+      if ( $this->is_free == 2 ) {
+        WDCFMUpdate::form_maker_update($version);
+      }
+      else {
+        WDFMUpdate::form_maker_update($version);
+      }
+    }
+    if ( get_option('fm_alter_table_notice') == '1' && get_option('fm_alter_table_privilege') == '0' ) {
+      echo WDW_FM_Library(self::PLUGIN)->message_id(17, '', 'error', function() {
+        ?>
+        <script>
+          jQuery(document).ready(function () {
+            var data = {
+              action: 'dismiss_alter_table_notice',
+              alter_table_notice: 0
+            };
+            jQuery('#fm-notice-dismiss-button').click(function () {
+              jQuery.get(ajaxurl, data, function () {
+                jQuery('#fm-notice').remove()
+              });
+            })
+          });
+        </script>
+        <?php
+      });
+    }
+  }
+
+  function dismiss_alter_table_notice_callback() {
+    $alter_table_notice = intval( WDW_FM_Library(self::PLUGIN)->get('alter_table_notice') );
+    update_option('fm_alter_table_notice', $alter_table_notice);
+    wp_die();
+  }
+
 
   public function enqueue_divi_bulder_assets() {
 	  wp_enqueue_style('thickbox');
@@ -571,6 +613,7 @@ final class WDFM {
       $page = ucfirst(substr($page, 0, strlen($page) - strlen($this->menu_postfix)));
       echo '<div id="fm_loading"></div>';
       echo '<div id="fm_admin_container" class="fm-form-container" style="display: none;">';
+      do_action( 'fm_admin_container_ready' );
       try {
         require_once ($this->plugin_dir . '/admin/controllers/' . $page . '_fm.php');
         $controller_class = 'FMController' . $page . $this->menu_postfix;
@@ -977,8 +1020,9 @@ final class WDFM {
    * @param string $type
    */
   public function FM_front_end_main($params = array(), $type = '') {
+    $form_id = isset($params['id']) ? (int) $params['id'] : 0;
+
     if ( !isset($params['type']) ) {
-      $form_id = isset($params['id']) ? (int) $params['id'] : 0;
       if ($this->is_free == 2) {
         wd_contact_form_maker($form_id, $type);
       }
@@ -1271,6 +1315,7 @@ final class WDFM {
     $new_version = $this->db_version;
 	  $option_key = ($this->is_free == 2 ? 'fmc_settings' : 'fm_settings');
     require_once $this->plugin_dir . "/form_maker_insert.php";
+
     if (!$version) {
       if ($wpdb->get_var("SHOW TABLES LIKE '" . $wpdb->prefix . "formmaker'") == $wpdb->prefix . "formmaker") {
         deactivate_plugins($this->main_file);
@@ -1526,7 +1571,7 @@ final class WDFM {
       'form-maker-pushover' => array('version' => '1.1.4', 'file' => 'fm_pushover.php'),
       'form-maker-reg' => array('version' => '1.2.5', 'file' => 'fm_reg.php'),
       'form-maker-save-progress' => array('version' => '1.1.6', 'file' => 'fm_save.php'),
-      'form-maker-stripe' => array('version' => '1.1.6', 'file' => 'fm_stripe.php'),
+      'form-maker-stripe' => array('version' => '1.2.6', 'file' => 'fm_stripe.php'),
       'form-maker-webhooks' => array('version' => '1.0.1', 'file' => 'fm_webhooks.php'),
     );
 

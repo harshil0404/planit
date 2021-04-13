@@ -404,6 +404,32 @@ class WDW_FM_Library {
   }
 
   /**
+   * Generate Random string
+   *
+   * Using: Rename Uploaded file's Name;
+   *
+   * @param int $length
+   * @param bool $type
+   *
+   * @return string|bool  return 'String' if $type is false, and 'Number' when $type is true
+   */
+  public static function generateRandomStrOrNum($length=6, $type=false) {
+    $randomStrOrNum = '';
+  	$characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+
+    for ( $i = 0; $i < $length; $i++ ) {
+    	if($type){
+	   		$randomStrOrNum .= rand(0, 9);
+			}
+	 		else {
+	   		$randomStrOrNum .= $characters[rand(0, $charactersLength - 1)];
+			}
+    }
+    return $randomStrOrNum;
+  }
+
+  /**
    * Validate data.
    *
    * @param $value
@@ -422,11 +448,12 @@ class WDW_FM_Library {
    * @param int $message_id
    * @param string $message If message_id is 0
    * @param string $type
+   * @param function
    *
    * @return mixed|string|void
    */
-  public static function message_id($message_id, $message = '', $type = 'updated') {
-    if ($message_id) {
+  public static function message_id( $message_id, $message = '', $type = 'updated', $message_close_function = NULL ) {
+    if ( $message_id ) {
       switch ( $message_id ) {
         case 1: {
           $message = 'Item Successfully Saved.';
@@ -502,6 +529,9 @@ class WDW_FM_Library {
           $message = 'Form is corrupted.';
           $type = 'error';
           break;
+        case 17:
+          $message = 'Database user has no privilege to change database table structure.';
+          break;
         default: {
           $message = '';
           break;
@@ -511,11 +541,19 @@ class WDW_FM_Library {
 
     if ($message) {
       ob_start();
-      ?><div class="<?php echo $type; ?> inline">
+      ?>
+      <div id="fm-notice" class="<?php echo $type; ?> inline fm-notice">
       <p>
         <strong><?php echo $message; ?></strong>
       </p>
-      </div><?php
+      <?php if ( $message_close_function != NULL ) { ?>
+        <button type="button" id="fm-notice-dismiss-button" class="fm-notice-dismiss-button">&#10006;</button>
+      <?php } ?>
+      </div>
+      <?php
+      if ( $message_close_function != NULL ) {
+        $message_close_function();
+      }
       $message = ob_get_clean();
     }
     else {
@@ -1016,7 +1054,7 @@ class WDW_FM_Library {
     if ( !$row ) {
       return;
     }
-    $pattern = '/\/\/(.+)(\r\n|\r|\n)/';
+    $pattern = '/^\/\/(.*)(\r\n|\r|\n)$/';
     $row_display = self::display_options($form_id);
     $row->javascript = str_replace('function before_reset()', 'function before_reset' . $form_id . '()', $row->javascript);
     $row->javascript = str_replace('function before_load()', 'function before_load' . $form_id . '()', $row->javascript);
@@ -1029,16 +1067,16 @@ class WDW_FM_Library {
     if ( $row->payment_currency ) {
       $form_currency = $row->payment_currency;
     }
-    $form_currency = apply_filters('fm_form_currency', $form_currency, $form_id);
-    $form_currency = self::replace_currency_code( $form_currency );
     $form_paypal_tax = 0;
     if ( $row->paypal_mode && $row->paypal_mode == 1 ) {
       $form_paypal_tax = $row->tax;
     }
     if ( $row->paypal_mode && $row->paypal_mode == 2 ) {
+    	$form_currency = apply_filters('fm_form_currency', $form_currency, $form_id);
       $stripe_data = apply_filters('fm_addon_stripe_get_data_init', array('form_id' => $form_id));
       $form_paypal_tax = $stripe_data->stripe_tax;
     }
+    $form_currency = self::replace_currency_code( $form_currency );
     $is_type = array();
     $id1s = array();
     $types = array();
@@ -1098,7 +1136,7 @@ class WDW_FM_Library {
           $cond_params = array_slice($cond_params, 0, count($cond_params) - 1);
           for ( $l = 0; $l < count($cond_params); $l++ ) {
             $params_value = explode('***', $cond_params[$l]);
-            if ( !isset($type_and_id[$params_value[0]]) ) {
+            if ( !isset($type_and_id[$params_value[0]]) && strpos($params_value[0], '_address_') < 0 ) {
               unset($cond_params[$l]);
             }
           }
@@ -1108,9 +1146,20 @@ class WDW_FM_Library {
           $change = '';
           $click = '';
           $blur = '';
+
+          preg_match ('/^\d+\_address_\d+$/', trim($field_label[$k]), $field_matches);
+          $selector = ' div[wdid=' . $field_label[$k] . ']';
+          if ( !empty($field_matches) ) {
+            $selector = ' #wdform_' . $field_label[$k];
+          }
           for ( $m = 0; $m < count($cond_params); $m++ ) {
             $params_value = explode('***', wp_specialchars_decode($cond_params[$m], 'single'));
-            switch ( $type_and_id[$params_value[0]] ) {
+            $type_key = $type_and_id[$params_value[0]];
+            preg_match ('/^\d+\_address_\d+$/', trim($params_value[0]), $key_matches);
+            if ( !empty($key_matches) ) {
+              $type_key = 'type_address';
+            }
+            switch ( $type_key ) {
               case "type_text":
               case "type_star_rating":
               case "type_password":
@@ -1150,6 +1199,51 @@ class WDW_FM_Library {
                 if ( $type_and_id[$params_value[0]] == "type_phone_new" ) {
                   $blur = '#wdform_' . $params_value[0] . '_element' . $form_id . ', ';
                 }
+                break;
+              case "type_time":
+                  if($params_value[1] == "==") {
+                    $if .= '!jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ).padStart(2, "0")' . $params_value[1] . '"' . $params_value[2] . '"' . '||' . '
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").find(":selected").val()' . $params_value[1] . '"' . $params_value[2] . '"';
+                  } else if ($params_value[1] == "!=") {
+                    $if .= '!jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ).padStart(2, "0")' . $params_value[1] . '"' . $params_value[2] . '"' . '||' . '
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").find(":selected").val()' . $params_value[1] . '"' . $params_value[2] . '"';
+                  }
+                  else if($params_value[1] == "%") {
+                    $if .= '!jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0")'
+                    . '==' . '"' . $params_value[2] . '"' . '.split(' . '":"' .')[0]' . '||' . '
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").find(":selected").val()' . '==' . '"' . $params_value[2]. '"'  .'.split(' . '":"' .')[0] ' . ' + '. '":"' . ' + ' . '"' .$params_value[2]. '"' . '.split(' . '":"' .')[2]';
+                  }
+                  else if($params_value[1] == "!%") {
+                    $if .= '!jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0")'
+                    . '!=' . '"' . $params_value[2] . '"' . '.split(' . '":"' .')[0]' . '||' . '
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").length
+                    && fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ).padStart(2, "0") + ":" +
+                    jQuery("#wdform_'. $params_value[0] .'_am_pm' . $form_id . '").find(":selected").val()' . '!=' . '"' . $params_value[2]. '"'  .'.split(' . '":"' .')[0] ' . ' + '. '":"' . ' + ' . '"' .$params_value[2]. '"' . '.split(' . '":"' .')[2]';
+                  }
+                  else if($params_value[1] == "=") {
+                    $if .= 'fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ) == ""' . '&&' . '
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ) == ""' . '&&' . '
+                    (jQuery("#wdform_' . $params_value[0] . '_ss' . $form_id . '").length ? fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_ss' . $form_id . '").val() )  == "" : true)';
+                  } else if($params_value[1] == "!"){
+                    $if .= '!(fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_hh' . $form_id . '").val() ) == ""' . '||' . '
+                    fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_mm' . $form_id . '").val() ) == ""' . '||' . '
+                    (jQuery("#wdform_' . $params_value[0] . '_ss' . $form_id . '").length ? fm_html_entities( jQuery("#wdform_' . $params_value[0] . '_ss' . $form_id . '").val() )  == "" : false))';
+                  }
+                $keyup .= '#wdform_' . $params_value[0] . '_hh' . $form_id . ', ' . '#wdform_' . $params_value[0] . '_mm' . $form_id . ', '. '#wdform_' . $params_value[0] . '_am_pm' . $form_id . ', ' . '#wdform_' . $params_value[0] . '_ss' . $form_id . ', ';
                 break;
               case "type_name":
                 if ( $params_value[1] == "%" || $params_value[1] == "!%" ) {
@@ -1601,16 +1695,16 @@ class WDW_FM_Library {
               case "type_address":
                 if ( $params_value[1] == "%" || $params_value[1] == "!%" ) {
                   $like_or_not = ($params_value[1] == "%" ? ">" : "==");
-                  $if .= ' jQuery("#wdform_' . $params_value[0] . '_country' . $form_id . '").val().indexOf("' . $params_value[2] . '")' . $like_or_not . '-1 ';
+                  $if .= ' && jQuery(".wdform_' . $params_value[0] . '").val().indexOf("' . $params_value[2] . '")' . $like_or_not . '-1 ';
                 }
                 else {
                   if ( $params_value[1] == "=" || $params_value[1] == "!" ) {
                     $params_value[2] = "";
                     $params_value[1] = $params_value[1] . "=";
                   }
-                  $if .= ' jQuery("#wdform_' . $params_value[0] . '_country' . $form_id . '").val()' . $params_value[1] . '"' . $params_value[2] . '" ';
+                  $if .= ' && jQuery(".wdform_' . $params_value[0] . '").val()' . $params_value[1] . '"' . $params_value[2] . '" ';
                 }
-                $change .= '#wdform_' . $params_value[0] . '_country' . $form_id . ', ';
+                $change .= '.wdform_' . $params_value[0] . ', ';
                 break;
               case "type_country":
                 if ( $params_value[1] == "%" || $params_value[1] == "!%" ) {
@@ -1735,23 +1829,24 @@ class WDW_FM_Library {
               }
             }
           }
+          $if = ltrim($if, ' && ');
           if ( $if ) {
             $condition_js .= '
   if(' . $if . ') {
-    jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display . ';
+    jQuery("#form' . $form_id . '' . $selector . '").' . $display . ';
   }
   else {
-    jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display_none . ';
+    jQuery("#form' . $form_id . '' . $selector . '").' . $display_none . ';
   }';
           }
           if ( $keyup ) {
             $condition_js .= '
-  jQuery("' . substr($keyup, 0, -2) . '").keyup(function() {
+  jQuery("' . substr($keyup, 0, -2) . '").on("keyup change", function() {
     if(' . $if . ') {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display . ';
     }
     else {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display_none . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display_none . ';
     }
     set_total_value(' . $form_id . ');
   });';
@@ -1760,10 +1855,10 @@ class WDW_FM_Library {
             $condition_js .= '
   jQuery("' . substr($change, 0, -2) . '").change(function() {
     if(' . $if . ') {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display . ';
     }
     else {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display_none . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display_none . ';
     }
     set_total_value(' . $form_id . ');
   });';
@@ -1772,9 +1867,9 @@ class WDW_FM_Library {
             $condition_js .= '
 							jQuery("' . substr($blur, 0, -2) . '").blur(function() {
 								if(' . $if . ')
-									jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display . ';
+									jQuery("#form' . $form_id . '' . $selector . '").' . $display . ';
 								else
-									jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display_none . ';
+									jQuery("#form' . $form_id . '' . $selector . '").' . $display_none . ';
                 set_total_value(' . $form_id . ');
               });';
           }
@@ -1782,10 +1877,10 @@ class WDW_FM_Library {
             $condition_js .= '
   jQuery("' . substr($click, 0, -2) . '").click(function() {
     if(' . $if . ') {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display . ';
     }
     else {
-      jQuery("#form' . $form_id . ' div[wdid=' . $field_label[$k] . ']").' . $display_none . ';
+      jQuery("#form' . $form_id . '' . $selector . '").' . $display_none . ';
     }
     set_total_value(' . $form_id . ');
   });';
@@ -2013,6 +2108,21 @@ class WDW_FM_Library {
                 'w_class',
               );
             }
+						if ( strpos($temp, 'w_characters_limit') > -1 ) {
+							$params_names = array(
+							 'w_field_label_size',
+							 'w_field_label_pos',
+							 'w_hide_label',
+							 'w_size_w',
+							 'w_size_h',
+							 'w_first_val',
+							 'w_characters_limit',
+							 'w_title',
+							 'w_required',
+							 'w_unique',
+							 'w_class',
+							);
+						}
             foreach ( $params_names as $params_name ) {
               $temp = explode('*:*' . $params_name . '*:*', $temp);
               $param[$params_name] = esc_html($temp[0]);
@@ -2355,7 +2465,28 @@ class WDW_FM_Library {
                 'w_class',
               );
             }
-
+		  			if ( strpos($temp, 'w_limit_choice') > -1 ) {
+							$params_names = array(
+								 'w_field_label_size',
+								 'w_field_label_pos',
+								 'w_field_option_pos',
+								 'w_hide_label',
+								 'w_flow',
+								 'w_choices',
+								 'w_choices_checked',
+								 'w_rowcol',
+								 'w_limit_choice',
+								 'w_limit_choice_alert',
+								 'w_required',
+								 'w_randomize',
+								 'w_allow_other',
+								 'w_allow_other_num',
+								 'w_value_disabled',
+								 'w_choices_value',
+								 'w_choices_params',
+								 'w_class',
+							);
+						}
             foreach ( $params_names as $params_name ) {
               $temp = explode('*:*' . $params_name . '*:*', $temp);
               $param[$params_name] = esc_html($temp[0]);
@@ -3267,7 +3398,7 @@ class WDW_FM_Library {
               $check_js .= '
   if(x.find(jQuery("div[wdid=' . $id1 . ']")).length != 0 && x.find(jQuery("div[wdid=' . $id1 . ']")).css("display") != "none") {
     if(jQuery("#wdform_' . $id1 . '_element_dollars' . $form_id . '").val() == "' . $w_title[0] . '" || jQuery("#wdform_' . $id1 . '_element_dollars' . $form_id . '").val() == "") {
-      alert("' . addslashes($label . ' ' . __('field is required.', WDFMInstance(self::PLUGIN)->prefix)) . '");
+      alert("' . addslashes(sprintf(__('%s field is required.', WDFMInstance(self::PLUGIN)->prefix), $label)) . '");
       old_bg=x.find(jQuery("div[wdid=' . $id1 . ']")).css("background-color");
       x.find(jQuery("div[wdid=' . $id1 . ']")).effect( "shake", {}, 500 ).css("background-color","#FF8F8B").animate({backgroundColor: old_bg}, {duration: 500, queue: false });
       jQuery("#wdform_' . $id1 . '_element_dollars' . $form_id . '").focus();
@@ -3297,7 +3428,7 @@ class WDW_FM_Library {
     var range_max=' . ($param['w_range_max'] ? $param['w_range_max'] : -1) . ';
     if(' . ($required ? 'true' : 'false') . ' || jQuery("#wdform_' . $id1 . '_element_dollars' . $form_id . '").val() != "' . $w_title[0] . '" || jQuery("#wdform_' . $id1 . '_element_cents' . $form_id . '").val() != "' . $w_title[1] . '") {
       if((range_max!=-1 && parseFloat(price)>range_max) || parseFloat(price)<range_min) {
-        alert("' . addslashes((__('The', WDFMInstance(self::PLUGIN)->prefix)) . $label . (__('value must be between', WDFMInstance(self::PLUGIN)->prefix)) . ($param['w_range_min'] ? $param['w_range_min'] : 0) . '-' . ($param['w_range_max'] ? $param['w_range_max'] : "any")) . '");
+        alert("' . addslashes(sprintf(__('The %s value must be between %f - %f', WDFMInstance(self::PLUGIN)->prefix), $label, ($param['w_range_min'] ? $param['w_range_min'] : 0), ($param['w_range_max'] ? $param['w_range_max'] : "any"))).'");
         old_bg=x.find(jQuery("div[wdid=' . $id1 . ']")).css("background-color");
         x.find(jQuery("div[wdid=' . $id1 . ']")).effect( "shake", {}, 500 ).css("background-color","#FF8F8B").animate({backgroundColor: old_bg}, {duration: 500, queue: false });
         jQuery("#wdform_' . $id1 . '_element_dollars' . $form_id . '").focus();
@@ -3890,10 +4021,10 @@ class WDW_FM_Library {
   jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '1")[0].spin = null;
   spinner0 = jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '0").spinner();
   if ("' . $param['w_field_value1'] . '" == "null" && jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '0").val() == "") { spinner0.spinner("value", ""); }
-  jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '").spinner({ step: ' . $param['w_field_range_step'] . '});
+  jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '0").spinner({ step: ' . $param['w_field_range_step'] . '});
   spinner1 = jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '1").spinner();
   if ("' . $param['w_field_value2'] . '" == "null" && jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '1").val() == "") { spinner1.spinner("value", ""); }
-  jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '").spinner({ step: ' . $param['w_field_range_step'] . '});';
+  jQuery("#form' . $form_id . ' #wdform_' . $id1 . '_element' . $form_id . '1").spinner({ step: ' . $param['w_field_range_step'] . '});';
             if ( $required ) {
               array_push($req_fields, $id1);
             }
@@ -3944,7 +4075,7 @@ class WDW_FM_Library {
   var isAllowdedSubmit = true;
   if(x.find(jQuery("div[wdid=' . $id1 . ']")).length != 0 && x.find(jQuery("div[wdid=' . $id1 . ']")).css("display") != "none") {
     if(parseInt(jQuery("#wdform_' . $id1 . '_sum_element' . $form_id . '").html()) > ' . $param['w_total'] . ') {
-      alert("' . addslashes(__("Your score should be less than", WDFMInstance(self::PLUGIN)->prefix)) . ' ' . $param['w_total'] . '");
+      alert("' . addslashes(sprintf(__("Your score should be less than %f", WDFMInstance(self::PLUGIN)->prefix), $param['w_total'])). '");
       return false;
     }
   }';
@@ -4900,7 +5031,7 @@ class WDW_FM_Library {
         "dayNamesShort":["' . __('Sun', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Mon', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Tue', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Wed', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Thu', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Fri', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Sat', WDFMInstance(self::PLUGIN)->prefix) . '"],
        "dayNamesMin":["' . __('Su', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Mo', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Tu', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('We', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Th', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Fr', WDFMInstance(self::PLUGIN)->prefix) . '","' . __('Sa', WDFMInstance(self::PLUGIN)->prefix) . '"]
       });
-    })';
+    });';
   }
 
   /**
@@ -5364,8 +5495,8 @@ class WDW_FM_Library {
    * @return string
    */
   public static function replace_currency_code( $currency ) {
-    $currency_code = array('USD', 'EUR', 'GBP', 'JPY', 'CAD', 'MXN', 'HKD', 'HUF', 'NOK', 'NZD', 'SGD', 'SEK', 'PLN', 'AUD', 'DKK', 'CHF', 'CZK', 'ILS', 'BRL', 'TWD', 'MYR', 'PHP', 'THB', 'HRK', 'PKR');
-    $currency_sign = array('$', '&#8364;', '&#163;', '&#165;', 'C$', 'Mex$', 'HK$', 'Ft', 'kr', 'NZ$', 'S$', 'kr', 'zl', 'A$', 'kr', 'CHF', 'Kc', '&#8362;', 'R$', 'NT$', 'RM', '&#8369;', '&#xe3f;', 'kn', 'Rs');
+    $currency_code = array('USD', 'EUR', 'GBP', 'JPY', 'CAD', 'MXN', 'HKD', 'HUF', 'NOK', 'NZD', 'SGD', 'SEK', 'PLN', 'AUD', 'DKK', 'CHF', 'CZK', 'ILS', 'BRL', 'TWD', 'MYR', 'PHP', 'THB', 'HRK', 'PKR', 'KES', 'UGX', 'TZS', 'RWF', 'NGN', 'ZAR');
+    $currency_sign = array('$', '&#8364;', '&#163;', '&#165;', 'C$', 'Mex$', 'HK$', 'Ft', 'kr', 'NZ$', 'S$', 'kr', 'zl', 'A$', 'kr', 'CHF', 'Kc', '&#8362;', 'R$', 'NT$', 'RM', '&#8369;', '&#xe3f;', 'kn', 'Rs', 'KSh', 'USh', 'TSh', 'FRw', '&#8358;', 'R');
     if (isset($currency_code[$currency])) {
       $currency = $currency_sign[array_search($currency, $currency_code)];
     }
@@ -5399,8 +5530,9 @@ class WDW_FM_Library {
 		$data[__('Form fields', WDFMInstance(self::PLUGIN)->prefix)] = array_merge($inputs, $form_inputs);
 		$data[__('Misc', WDFMInstance(self::PLUGIN)->prefix)] = array(
 			array('value' => 'formtitle', 'title' => __('Form Title', WDFMInstance(self::PLUGIN)->prefix)),
-			array('value' => 'subid', 'title' => __('Submission ID', WDFMInstance(self::PLUGIN)->prefix)),
-			array('value' => 'ip', 'title' => __('IP', WDFMInstance(self::PLUGIN)->prefix)),
+      array('value' => 'ip', 'title' => __('IP', WDFMInstance(self::PLUGIN)->prefix)),
+      array('value' => 'subid', 'title' => __('Submission ID', WDFMInstance(self::PLUGIN)->prefix)),
+      array('value' => 'subdate', 'title' => __('Submission Date', WDFMInstance(self::PLUGIN)->prefix)),
 			array('value' => 'adminemail', 'title' => __('Admin Email', WDFMInstance(self::PLUGIN)->prefix)),
 			array('value' => 'useremail', 'title' => __('User Email', WDFMInstance(self::PLUGIN)->prefix)),
 			array('value' => 'username', 'title' => __('User Name', WDFMInstance(self::PLUGIN)->prefix)),

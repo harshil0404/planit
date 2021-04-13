@@ -42,6 +42,14 @@
 .submissions td {
   padding: 10px 4px;
   border:none !important;
+  vertical-align:top;
+  max-width: 300px;
+  min-width: 200px;
+}
+.submissions td p{
+  font-family:inherit;
+  white-space: normal;
+  word-break: break-word;
 }
 .submissions tr.row1 {
   background-color: #f0f0ee !important;
@@ -92,22 +100,38 @@
 }
 .tablenav .tablenav-pages {
   float: right;
-  display: block;
+  display: flex;
   cursor: default;
   height: 30px;
   color: #555;
   line-height: 30px;
-  font-size: 12px;
+  font-size: 13px;
 }
+.tablenav .tablenav-pages .pagination-links,
+.tablenav .tablenav-pages .paging-input {
+  display: flex;
+}
+.tablenav .tablenav-pages .pagination-links>a,
+.tablenav .tablenav-pages .paging-input,
+.tablenav .tablenav-pages .total-pages {
+  margin-left: 3px;
+  text-decoration: none;
+}
+.tablenav .tablenav-pages .total-pages {
+  margin-right: 3px;
+}
+
 .tablenav .displaying-num {
   margin-right: 2px;
   color: #777;
-  font-size: 12px;
+  font-size: 13px;
   font-style: italic;
 }
 .tablenav .tablenav-pages .current_page {
-	width:15%;
 	text-align: center;
+  line-height: 28px;
+  padding: 0;
+  font-size: 13px;
 }
 .tablenav .tablenav-pages a.disabled, 
 .tablenav .tablenav-pages a.disabled:active, 

@@ -20,6 +20,11 @@ jQuery(window).on('load', function () {
       jQuery("#add_field_cont").css("top", scrollToTop);
     }
   });
+  jQuery('#placeholders_overlay').on("click", function() {
+    var value = jQuery('.fm-input-container.placeholders-active input').val();
+    jQuery('.fm-input-container.placeholders-active input').val(value).change();
+    fm_placeholders_popup_close();
+  });
 });
 
 jQuery(function () {
@@ -71,8 +76,15 @@ function storageAvailable(type) {
 // Close popup on escape.
 jQuery(document).on('keydown', function (e) {
   if (e.keyCode === 27) { /* Esc.*/
-    if (jQuery(".add-popup").is(":visible")) {
-      close_window();
+    if (jQuery("#placeholders_overlay").is(":visible")) {
+      var value = jQuery('.fm-input-container.placeholders-active input').val();
+      jQuery('.fm-input-container.placeholders-active input').val(value).change();
+      fm_placeholders_popup_close();
+    }
+    else {
+      if (jQuery(".add-popup").is(":visible")) {
+       close_window();
+      }
     }
   }
 });
@@ -309,13 +321,14 @@ function edit(id, e) {
     case 'type_textarea': {
       w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
       w_first_val = document.getElementById(id + "_elementform_id_temp").value;
+      w_characters_limit = document.getElementById(id + "_charlimitform_id_temp").value;
       w_title = document.getElementById(id + "_elementform_id_temp").title;
       s = document.getElementById(id + "_elementform_id_temp").style.height;
       w_size_h = s.substring(0, s.length - 2);
       atrs = return_attributes(id + '_elementform_id_temp');
       w_attr_name = atrs[0];
       w_attr_value = atrs[1];
-      type_textarea(id, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_size_h, w_first_val, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value);
+      type_textarea(id, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_size_h, w_first_val, w_characters_limit, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value);
       break;
     }
     case 'type_wdeditor': {
@@ -526,6 +539,8 @@ function edit(id, e) {
     case 'type_checkbox': {
       w_randomize = document.getElementById(id + "_randomizeform_id_temp").value;
       w_allow_other = document.getElementById(id + "_allow_otherform_id_temp").value;
+      w_limit_choice = document.getElementById(id + "_limitchoice_numform_id_temp").value;
+      w_limit_choice_alert = document.getElementById(id + "_limitchoicealert_numform_id_temp").value;
       if (document.getElementById(id + "_rowcol_numform_id_temp").value) {
         if (document.getElementById(id + '_table_little').getAttribute('for_hor')) {
           w_flow = "hor"
@@ -610,7 +625,7 @@ function edit(id, e) {
       atrs = return_attributes(id + '_elementform_id_temp' + v);
       w_attr_name = atrs[0];
       w_attr_value = atrs[1];
-      type_checkbox(id, w_field_label, w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol, w_required, w_randomize, w_allow_other, w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params);
+      type_checkbox(id, w_field_label, w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol, w_limit_choice, w_limit_choice_alert, w_required, w_randomize, w_allow_other, w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params);
       break;
     }
     case 'type_paypal_checkbox': {
@@ -883,11 +898,13 @@ function edit(id, e) {
     case 'type_paypal_total': {
       w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
       w_size = jQuery('#' + id + "paypal_totalform_id_temp").css('width') ? jQuery('#' + id + "paypal_totalform_id_temp").css('width').substring(0, jQuery('#' + id + "paypal_totalform_id_temp").css('width').length - 2) : '300';
-      type_paypal_total(id, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size);
+      w_hide_total_currency = document.getElementById(id + "_hide_totalcurrency_id_temp").value;
+      type_paypal_total(id, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size, w_hide_total_currency);
       break;
     }
     case 'type_stripe': {
-      type_stripe(id, w_size, w_field_label_size, w_field_label_pos, w_class);
+      w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
+      type_stripe(id, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_class);
       break;
     }
     case 'type_star_rating': {
@@ -941,7 +958,9 @@ function edit(id, e) {
       w_field_range_width = document.getElementById(id + "_range_widthform_id_temp").value;
       w_field_range_step = document.getElementById(id + "_range_stepform_id_temp").value;
       w_field_value1 = document.getElementById(id + "_elementform_id_temp0").getAttribute("aria-valuenow");
+      w_field_value1 = (w_field_value1) ? w_field_value1 : '';
       w_field_value2 = document.getElementById(id + "_elementform_id_temp1").getAttribute("aria-valuenow");
+      w_field_value2 = (w_field_value2) ? w_field_value2 : '';
       atrs = return_attributes(id + '_elementform_id_temp0');
       w_attr_name = atrs[0];
       w_attr_value = atrs[1];
@@ -2251,7 +2270,7 @@ function el_checkbox(subtype, new_id) {
   w_choices_params = ["", ""];
   w_attr_name = [];
   w_attr_value = [];
-  type_checkbox(new_id, 'Multiple Choice', '', 'top', 'right', 'no', 'ver', w_choices, w_choices_checked, '1', 'no', 'no', 'no', '0', '', w_attr_name, w_attr_value, 'no', w_choices_value, w_choices_params);
+  type_checkbox(new_id, 'Multiple Choice', '', 'top', 'right', 'no', 'ver', w_choices, w_choices_checked, '1', '', 'You have exceeded the selection limit.', 'no', 'no', 'no', '0', '', w_attr_name, w_attr_value, 'no', w_choices_value, w_choices_params);
 }
 
 function el_radio(subtype, new_id) {
@@ -2336,7 +2355,7 @@ function create_option_container(label, input, id, visible) {
     option_div.append(label_div);
   }
   if (input != null) {
-    var input_div = jQuery('<div class="fm-input-container' + (label == null ? ' fm-width-100' : '') + '"></div>');
+    var input_div = jQuery('<div class="wd-group fm-input-container wd-has-placeholder' + (label == null ? ' fm-width-100' : '') + '"></div>');
     input_div.append(input);
     option_div.append(input_div);
   }
@@ -2364,7 +2383,6 @@ function create_label(i, w_field_label) {
 
 function change_label(id, label, type) {
   label = label.replace(/(<(?!(\/?b|\/?p|\/?a|\/?strong|\/?span|\/?br|\/?ul|\/?ol|\/?li|\/?i|\/))([^>]+)>)/ig, "");
-  label = label.replace(/"/g, "&quot;");
   if (!type) {
     document.getElementById(id).innerHTML = label;
     document.getElementById(id).value = label;
@@ -3303,10 +3321,10 @@ function type_file_upload(i, w_field_label, w_field_label_size, w_field_label_po
 
 function go_to_type_stripe(new_id) {
   if (document.getElementById('is_stripe')) return false;
-  type_stripe(new_id, '', '', 'top', '');
+  type_stripe(new_id, 'Stripe', '', 'top', 'yes', '', '');
 }
 
-function type_stripe(i, w_size, w_field_label_size, w_field_label_pos, w_class ) {
+function type_stripe(i, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_class ) {
   jQuery("#element_type").val("type_stripe");
   delete_last_child();
 
@@ -3316,8 +3334,10 @@ function type_stripe(i, w_size, w_field_label_size, w_field_label_pos, w_class )
   var edit_main_table = jQuery('<div id="edit_main_table"></div>');
   edit_div.append(edit_main_table);
   edit_main_table.append(create_field_type('type_stripe'));
-  edit_main_table.append(create_field_size(i, w_size));
+  edit_main_table.append(create_label(i, w_field_label));
   edit_main_table.append(create_label_position_stripe(i, w_field_label_pos));
+  edit_main_table.append(create_hide_label(i, w_hide_label));
+  edit_main_table.append(create_field_size(i, w_size));
 
   var advanced_options_container = jQuery('<div class="inside"></div>');
   edit_main_table.append(create_advanced_options_container(advanced_options_container));
@@ -3338,11 +3358,17 @@ function type_stripe(i, w_size, w_field_label_size, w_field_label_pos, w_class )
   var div_field = document.createElement('div');
   div_field.setAttribute("id", i + "_elemet_tableform_id_temp");
 
+  var display_label_div = (w_hide_label == "yes" ? "none" : "table-cell");
   var div_label = document.createElement('div');
   div_label.setAttribute("align", 'left');
-  div_label.style.display = "table-cell";
-  div_label.setAttribute("id", i + "_label_sectionform_id_temp");
+  div_label.style.cssText = 'display:' + display_label_div;
   div_label.style.width = w_field_label_size + 'px';
+  div_label.setAttribute("id", i + "_label_sectionform_id_temp");
+  var adding_hide_label = document.createElement("input");
+  adding_hide_label.setAttribute("type", "hidden");
+  adding_hide_label.setAttribute("value", w_hide_label);
+  adding_hide_label.setAttribute("name", i + "_hide_labelform_id_temp");
+  adding_hide_label.setAttribute("id", i + "_hide_labelform_id_temp");
 
   var div_element = document.createElement('div');
   div_element.setAttribute("align", 'left');
@@ -3356,9 +3382,9 @@ function type_stripe(i, w_size, w_field_label_size, w_field_label_pos, w_class )
 
   var label = document.createElement('span');
   label.setAttribute("id", i + "_element_labelform_id_temp");
-  label.innerHTML = "stripe";
+  label.innerHTML = w_field_label;
   label.setAttribute("class", "label");
-  label.style.display = "none";
+  label.style.verticalAlign = "top";
 
   var main_td = document.getElementById('show_table');
 
@@ -3366,7 +3392,7 @@ function type_stripe(i, w_size, w_field_label_size, w_field_label_pos, w_class )
 
   div_element.innerHTML = "<div id='" + i + "_elementform_id_temp' style='width:" + w_size + "px; margin:10px; border: 1px solid #000; min-width:80px;text-align:center;'> Stripe Section</div><input type='hidden' id='is_stripe' />";
   div_element.appendChild(adding_type);
-
+  div_element.appendChild(adding_hide_label);
   div_field.appendChild(div_label);
   div_field.appendChild(div_element);
 
@@ -3394,10 +3420,10 @@ function create_field_size_2(i, w_size_w, w_size_h) {
 function go_to_type_textarea(new_id) {
   w_attr_name = [];
   w_attr_value = [];
-  type_textarea(new_id, 'Textarea', '', 'top', 'no', '', '100', '', '', 'no', 'no', '', w_attr_name, w_attr_value)
+  type_textarea(new_id, 'Textarea', '', 'top', 'no', '', '100', '', '', '', 'no', 'no', '', w_attr_name, w_attr_value)
 }
 
-function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size_w, w_size_h, w_first_val, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value) {
+function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size_w, w_size_h, w_first_val, w_characters_limit, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value) {
   jQuery("#element_type").val("type_textarea");
   delete_last_child();
 
@@ -3419,6 +3445,7 @@ function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, 
   advanced_options_container.append(create_field_label_size(i, w_field_label_size));
   advanced_options_container.append(create_unique_values(i, w_unique));
   advanced_options_container.append(create_class(i, w_class));
+  advanced_options_container.append(create_characters_limit(i, w_characters_limit, 'type_textarea'));
   advanced_options_container.append(create_additional_attributes(i, w_attr_name, 'type_textarea'));
 
   // Preview
@@ -3439,6 +3466,12 @@ function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, 
   adding_hide_label.setAttribute("value", w_hide_label);
   adding_hide_label.setAttribute("name", i + "_hide_labelform_id_temp");
   adding_hide_label.setAttribute("id", i + "_hide_labelform_id_temp");
+
+  var adding_characters_limit = document.createElement("input");
+  adding_characters_limit.setAttribute("type", "hidden");
+  adding_characters_limit.setAttribute("value", w_characters_limit);
+  adding_characters_limit.setAttribute("name", i + "_charlimitform_id_temp");
+  adding_characters_limit.setAttribute("id", i + "_charlimitform_id_temp");
 
   var adding_unique = document.createElement("input");
   adding_unique.setAttribute("type", "hidden");
@@ -3491,6 +3524,7 @@ function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, 
   adding.setAttribute("title", w_title);
   adding.setAttribute("placeholder", w_title);
   adding.setAttribute("value", w_first_val);
+  adding.setAttribute("maxlength", w_characters_limit);
   adding.innerHTML = w_first_val;
 
   var main_td = document.getElementById('show_table');
@@ -3499,6 +3533,7 @@ function type_textarea(i, w_field_label, w_field_label_size, w_field_label_pos, 
   div_label.appendChild(required);
   div_element.appendChild(adding_type);
   div_element.appendChild(adding_required);
+  div_element.appendChild(adding_characters_limit);
   div_element.appendChild(adding_hide_label);
   div_element.appendChild(adding_unique);
   div_element.appendChild(adding);
@@ -4766,6 +4801,29 @@ function create_relative_position(i, w_flow, type) {
   return create_option_container(label, input);
 }
 
+function refresh_limit_choice(num, type) {
+  if (!document.getElementById('edit_for_limitchoice').value) {
+    document.getElementById('edit_for_limitchoice').value = "";
+  }
+  document.getElementById(num + '_limitchoice_numform_id_temp').value = document.getElementById('edit_for_limitchoice').value;
+  refresh_attr(num, 'type_' + type);
+}
+function refresh_limit_choice_alert(num, type) {
+  if (!document.getElementById('edit_for_limitchoicealert').value) {
+    document.getElementById('edit_for_limitchoicealert').value = "You have exceeded the selection limit.";
+  }
+  document.getElementById(num + '_limitchoicealert_numform_id_temp').value = document.getElementById('edit_for_limitchoicealert').value;
+  refresh_attr(num, 'type_' + type);
+}
+
+function refresh_characters_limit(num, type) {
+  if (!document.getElementById('edit_for_charlimit').value) {
+    document.getElementById('edit_for_charlimit').value = "";
+  }
+  document.getElementById(num + '_charlimitform_id_temp').value = document.getElementById('edit_for_charlimit').value;
+  refresh_attr(num, 'type_' + type);
+}
+
 function refresh_rowcol(num, type) {
   if (!document.getElementById('edit_for_rowcol').value) {
     document.getElementById('edit_for_rowcol').value = 1;
@@ -5000,7 +5058,25 @@ function option_left(id, type) {
 
 function create_rowcol(i, w_rowcol, type) {
   var label = jQuery('<label class="fm-field-label" for="edit_for_rowcol">Rows/Columns</label>');
-  var input = jQuery('<input type="text" class="fm-width-100" id="edit_for_rowcol" onChange="refresh_rowcol(' + i + ',\'' + type + '\')" value="' + w_rowcol + '" />');
+  var input = jQuery('<input type="number" class="fm-width-100" min="1" id="edit_for_rowcol" oninput="validity.valid||(value=\'\')"; onChange="refresh_rowcol(' + i + ',\'' + type + '\')" value="' + w_rowcol + '" />');
+  return create_option_container(label, input);
+}
+
+function create_limit_choice(i, w_limit_choice, type) {
+  var label = jQuery('<label class="fm-field-label" for="edit_for_limitchoice">Limit of Selected Choices</label>');
+  var input = jQuery('<input type="number" class="fm-width-100" id="edit_for_limitchoice" min="0" oninput="validity.valid||(value=\'\')"; onChange="refresh_limit_choice(' + i + ',\'' + type + '\')" value="' + w_limit_choice + '" />');
+  return create_option_container(label, input);
+}
+
+function create_limit_choice_alert(i, w_limit_choice_alert, type) {
+  var label = jQuery('<label class="fm-field-label" for="edit_for_limitchoicealert">Alert for Selected Choice Limit</label>');
+  var input = jQuery('<input type="text" class="fm-width-100" id="edit_for_limitchoicealert" onChange="refresh_limit_choice_alert(' + i + ',\'' + type + '\')" value="' + w_limit_choice_alert + '" />');
+  return create_option_container(label, input);
+}
+
+function create_characters_limit(i, w_characters_limit, type) {
+  var label = jQuery('<label class="fm-field-label" for="edit_for_charlimit">Limit of characters</label>');
+  var input = jQuery('<input type="number" class="fm-width-100" id="edit_for_charlimit" min="0" oninput="validity.valid||(value=\'\');" onChange="refresh_characters_limit(' + i + ',\'' + type + '\')" value="' + w_characters_limit + '" />');
   return create_option_container(label, input);
 }
 
@@ -5305,7 +5381,7 @@ function type_radio(i, w_field_label, w_field_label_size, w_field_label_pos, w_f
   });
 }
 
-function type_checkbox(i, w_field_label, w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol,  w_required, w_randomize, w_allow_other,w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params) {
+function type_checkbox(i, w_field_label, w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol, w_limit_choice, w_limit_choice_alert,  w_required, w_randomize, w_allow_other,w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params) {
   jQuery("#element_type").val("type_checkbox");
   delete_last_child();
 
@@ -5328,6 +5404,8 @@ function type_checkbox(i, w_field_label, w_field_label_size, w_field_label_pos, 
   advanced_options_container.append(create_field_label_size(i, w_field_label_size));
   advanced_options_container.append(create_class(i, w_class));
   advanced_options_container.append(create_rowcol(i, w_rowcol, 'checkbox'));
+  advanced_options_container.append(create_limit_choice(i, w_limit_choice, 'checkbox'));
+  advanced_options_container.append(create_limit_choice_alert(i, w_limit_choice_alert, 'checkbox'));
   advanced_options_container.append(create_randomize(i, w_randomize));
   advanced_options_container.append(create_enable_options_value(i, w_value_disabled, 'checkbox'));
   advanced_options_container.append(create_allow_other(i, w_allow_other, 'checkbox'));
@@ -5371,11 +5449,24 @@ function type_checkbox(i, w_field_label, w_field_label_size, w_field_label_pos, 
   adding_allow_other_id.setAttribute("name", i + "_allow_other_numform_id_temp");
   adding_allow_other_id.setAttribute("id", i + "_allow_other_numform_id_temp");
 
+  var adding_limit_choice = document.createElement("input");
+  adding_limit_choice.setAttribute("type", "hidden");
+  adding_limit_choice.setAttribute("value", w_limit_choice);
+  adding_limit_choice.setAttribute("name", i + "_limitchoice_numform_id_temp");
+  adding_limit_choice.setAttribute("id", i + "_limitchoice_numform_id_temp");
+
+  var adding_limit_choice_alert = document.createElement("input");
+  adding_limit_choice_alert.setAttribute("type", "hidden");
+  adding_limit_choice_alert.setAttribute("value", w_limit_choice_alert);
+  adding_limit_choice_alert.setAttribute("name", i + "_limitchoicealert_numform_id_temp");
+  adding_limit_choice_alert.setAttribute("id", i + "_limitchoicealert_numform_id_temp");
+
   var adding_rowcol = document.createElement("input");
   adding_rowcol.setAttribute("type", "hidden");
   adding_rowcol.setAttribute("value", w_rowcol);
   adding_rowcol.setAttribute("name", i + "_rowcol_numform_id_temp");
   adding_rowcol.setAttribute("id", i + "_rowcol_numform_id_temp");
+
   var adding_option_left_right = document.createElement("input");
   adding_option_left_right.setAttribute("type", "hidden");
   adding_option_left_right.setAttribute("value", w_field_option_pos);
@@ -5443,6 +5534,8 @@ function type_checkbox(i, w_field_label, w_field_label_size, w_field_label_pos, 
   div_element.appendChild(adding_allow_other);
   div_element.appendChild(adding_allow_other_id);
   div_element.appendChild(adding_rowcol);
+  div_element.appendChild(adding_limit_choice);
+  div_element.appendChild(adding_limit_choice_alert);
   div_element.appendChild(adding_option_left_right);
   div_element.appendChild(adding_value_disabled);
   div_element.appendChild(table_little_t);
@@ -8469,6 +8562,23 @@ function create_hide_payment_currency(i, w_currency) {
   return create_option_container(label, input);
 }
 
+function create_hide_total_currency(i, w_hide_total_currency) {
+  var label = jQuery('<label class="fm-field-label" for="el_hide_total_currency">Hide currency</label>');
+  var input = jQuery('<input type="checkbox" id="el_hide_total_currency" onchange="hide_total_currency(' + i + ')"' + (w_hide_total_currency == 'yes' ? ' checked="checked"' : '') + ' />');
+  return create_option_container(label, input);
+}
+
+function hide_total_currency(id) {
+  if(jQuery("#" + id + "_hide_totalcurrency_id_temp").val()=="no"){
+    jQuery("#" + id + "_hide_totalcurrency_id_temp").val("yes");
+    jQuery("#" + id + "toggle_currency").removeClass("wd-inline-block").addClass("wd-hidden");
+  }
+  else {
+    jQuery("#" + id + "_hide_totalcurrency_id_temp").val("no");
+    jQuery("#" + id + "toggle_currency").removeClass("wd-hidden").addClass("wd-inline-block");
+  }
+}
+
 function change_input_range_new(type, id) {
   var s = '';
   if (document.getElementById('el_range_' + type + '1').value != '') {
@@ -10058,10 +10168,10 @@ function type_paypal_shipping(i, w_field_label, w_field_label_size, w_field_labe
 }
 
 function go_to_type_paypal_total(new_id) {
-  type_paypal_total(new_id, 'Total', '', 'top', 'no', '', '');
+  type_paypal_total(new_id, 'Total', '', 'top', 'no', '', '', 'no');
 }
 
-function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size ) {
+function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size, w_hide_total_currency ) {
   jQuery("#element_type").val("type_paypal_total");
   delete_last_child();
 
@@ -10078,6 +10188,7 @@ function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_p
   var advanced_options_container = jQuery('<div class="inside"></div>');
   edit_main_table.append(create_advanced_options_container(advanced_options_container));
   advanced_options_container.append(create_field_label_size(i, w_field_label_size));
+  advanced_options_container.append(create_hide_total_currency(i, w_hide_total_currency));
   advanced_options_container.append(create_class(i, w_class));
 
   // Preview.
@@ -10092,6 +10203,12 @@ function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_p
   adding_hide_label.setAttribute("value", w_hide_label);
   adding_hide_label.setAttribute("name", i + "_hide_labelform_id_temp");
   adding_hide_label.setAttribute("id", i + "_hide_labelform_id_temp");
+
+  var adding_hide_total_currency = document.createElement("input");
+  adding_hide_total_currency.setAttribute("type", "hidden");
+  adding_hide_total_currency.setAttribute("value", w_hide_total_currency);
+  adding_hide_total_currency.setAttribute("name", i + "_hide_totalcurrency_id_temp");
+  adding_hide_total_currency.setAttribute("id", i + "_hide_totalcurrency_id_temp");
 
   var div = document.createElement('div');
   div.setAttribute("id", "main_div");
@@ -10130,7 +10247,14 @@ function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_p
   div_total.setAttribute("id", i + "div_totalform_id_temp");
   div_total.setAttribute("class", "div_totalform_id_temp");
   div_total.style.cssText = 'margin-bottom:10px;';
-  div_total.innerHTML = '<!--repstart-->$300<!--repend-->';
+  div_total.innerHTML = '300';
+
+  var display_total_currency = (w_hide_total_currency == "yes" ? "wd-hidden" : "wd-inline-block");
+  var span_toggle_currency = document.createElement('span');
+  span_toggle_currency.setAttribute("id", i + "toggle_currency");
+  span_toggle_currency.setAttribute("class", display_total_currency);
+  span_toggle_currency.style.float = "left";
+  span_toggle_currency.innerHTML = '$';
 
   var div_products = document.createElement('div');
   div_products.setAttribute("id", i + "paypal_productsform_id_temp");
@@ -10162,6 +10286,7 @@ function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_p
   div_paypal.appendChild(div_total);
   div_paypal.appendChild(div_products);
   div_paypal.appendChild(div_tax);
+  div_total.appendChild(span_toggle_currency);
 
   var main_td = document.getElementById('show_table');
 
@@ -10172,6 +10297,7 @@ function type_paypal_total(i, w_field_label, w_field_label_size, w_field_label_p
 
   div_label.appendChild(label);
   div_element.appendChild(adding_hide_label);
+  div_element.appendChild(adding_hide_total_currency);
   div_element.appendChild(adding_type);
 
   div_element.appendChild(div_paypal);
@@ -12623,7 +12749,7 @@ function change_field_name(id, x) {
 
 function create_hidden_value(i, w_value) {
   var label = jQuery('<label class="fm-field-label" for="el_hidden_value">Value</label>');
-  var input = jQuery('<input type="text" class="fm-width-100" id="el_hidden_value" onChange="change_field_value(' + i + ', this.value)" value="' + w_value + '" />');
+  var input = jQuery('<input type="text" class="fm-width-100" id="el_hidden_value" onChange="change_field_value(' + i + ', this.value)" value="' + w_value + '" /><span class="dashicons dashicons-list-view" data-id="el_hidden_value"></span>');
   return create_option_container(label, input);
 }
 
@@ -12645,7 +12771,7 @@ function type_hidden(i, w_name, w_value, w_attr_name, w_attr_value) {
   var t = jQuery('#edit_table');
   var edit_div = jQuery('<div id="edit_div"></div>');
   t.append(edit_div);
-  var edit_main_table = jQuery('<div id="edit_main_table"></div>');
+  var edit_main_table = jQuery('<div id="edit_main_table" class="js"></div>');
   edit_div.append(edit_main_table);
   edit_main_table.append(create_field_type('type_hidden'));
   edit_main_table.append(create_hidden_name(i, w_name));
@@ -14817,6 +14943,7 @@ function gen_form_fields() {
     case 'type_textarea': {
       w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
       w_first_val = document.getElementById(id + "_elementform_id_temp").value;
+      w_characters_limit = document.getElementById(id + "_charlimitform_id_temp").value;
       w_title = document.getElementById(id + "_elementform_id_temp").title;
       s = document.getElementById(id + "_elementform_id_temp").style.height;
       w_size_h = s.substring(0, s.length - 2);
@@ -14832,6 +14959,7 @@ function gen_form_fields() {
       form_fields += w_size + "*:*w_size_w*:*";
       form_fields += w_size_h + "*:*w_size_h*:*";
       form_fields += w_first_val + "*:*w_first_val*:*";
+      form_fields += w_characters_limit + "*:*w_characters_limit*:*";
       form_fields += w_title + "*:*w_title*:*";
       form_fields += w_required + "*:*w_required*:*";
       form_fields += w_unique + "*:*w_unique*:*";
@@ -15175,6 +15303,8 @@ function gen_form_fields() {
     case 'type_checkbox': {
       w_randomize = document.getElementById(id + "_randomizeform_id_temp").value;
       w_allow_other = document.getElementById(id + "_allow_otherform_id_temp").value;
+      w_limit_choice = document.getElementById(id + "_limitchoice_numform_id_temp").value;
+      w_limit_choice_alert = document.getElementById(id + "_limitchoicealert_numform_id_temp").value;
       tt = 0;
       v = 0;
 
@@ -15268,6 +15398,8 @@ function gen_form_fields() {
       form_fields += w_choices.join('***') + "*:*w_choices*:*";
       form_fields += w_choices_checked.join('***') + "*:*w_choices_checked*:*";
       form_fields += w_rowcol + "*:*w_rowcol*:*";
+      form_fields += w_limit_choice + "*:*w_limit_choice*:*";
+      form_fields += w_limit_choice_alert + "*:*w_limit_choice_alert*:*";
       form_fields += w_required + "*:*w_required*:*";
       form_fields += w_randomize + "*:*w_randomize*:*";
       form_fields += w_allow_other + "*:*w_allow_other*:*";
@@ -15651,21 +15783,25 @@ function gen_form_fields() {
     case 'type_paypal_total': {
       w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
       w_size = jQuery('#' + id + "paypal_totalform_id_temp").css('width') ? jQuery('#' + id + "paypal_totalform_id_temp").css('width').substring(0, jQuery('#' + id + "paypal_totalform_id_temp").css('width').length - 2) : '300';
+      w_hide_total_currency = document.getElementById(id + "_hide_totalcurrency_id_temp").value;
       form_fields += w_field_label + "*:*w_field_label*:*";
       form_fields += w_field_label_size + "*:*w_field_label_size*:*";
       form_fields += w_field_label_pos + "*:*w_field_label_pos*:*";
       form_fields += w_hide_label + "*:*w_hide_label*:*";
       form_fields += w_class + "*:*w_class*:*";
       form_fields += w_size + "*:*w_size*:*";
+      form_fields += w_hide_total_currency + "*:*w_hide_total_currency*:*";
       form_fields += "*:*new_field*:*";
       break;
     }
 
     case 'type_stripe': {
+      w_hide_label = document.getElementById(id + "_hide_labelform_id_temp").value;
       form_fields += w_field_label + "*:*w_field_label*:*";
-      form_fields += w_size + "*:*w_field_size*:*";
       form_fields += w_field_label_size + "*:*w_field_label_size*:*";
       form_fields += w_field_label_pos + "*:*w_field_label_pos*:*";
+      form_fields += w_hide_label + "*:*w_hide_label*:*";
+      form_fields += w_size + "*:*w_size*:*";
       form_fields += w_class + "*:*w_class*:*";
       form_fields += "*:*new_field*:*";
       break;

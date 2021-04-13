@@ -483,13 +483,23 @@ function all_labels()
 	return labels;
 }
 
-function set_checked(id,j)
-{
-	checking=document.getElementById(id+"_elementform_id_temp"+j);
-	if(checking.checked)
+function set_checked(id,j) {
+	checking = document.getElementById(id+"_elementform_id_temp"+j);
+
+	jQuery(document).off('change').on('change', '#show_table input[type="checkbox"]', function() {
+		limitOfChoice = document.getElementById(id + "_limitchoice_numform_id_temp").value;
+		limitOfChoiceAlert = document.getElementById(id + "_limitchoicealert_numform_id_temp").value;
+		numberOfChecked = document.querySelectorAll('#show_table input[type="checkbox"]:checked').length;
+		if ( limitOfChoice !="" && numberOfChecked > limitOfChoice ) {
+			this.checked = false;
+			alert(limitOfChoiceAlert);
+		}
+	});
+
+	if (checking.checked) {
 		checking.setAttribute("checked", "checked");
-	if(!checking.checked)
-	{
+	}
+	if(!checking.checked) {
 		checking.removeAttribute("checked");
 		if(checking.getAttribute('other'))
 			if(checking.getAttribute('other')==1)
@@ -541,14 +551,28 @@ function add_0(id)
 }
 
 function label_top_stripe(num) {
+	if(document.getElementById(num+'_label_sectionform_id_temp') && document.getElementById(num+'_element_sectionform_id_temp')){
+		if (document.getElementById(num + '_hide_labelform_id_temp').value == "no") {
 	document.getElementById(num+'_label_sectionform_id_temp').style.display="block";
 	document.getElementById(num+'_element_sectionform_id_temp').style.display="block";
 }
-
-
+		else {
+			document.getElementById(num+'_label_sectionform_id_temp').style.display = "none";
+			document.getElementById(num+'_element_sectionform_id_temp').style.display = "block";
+		}
+	}
+}
 function label_left_stripe(num) {
+	if(document.getElementById(num+'_label_sectionform_id_temp') && document.getElementById(num + '_element_sectionform_id_temp')) {
+		if (document.getElementById(num + '_hide_labelform_id_temp').value == "no") {
 	document.getElementById(num+'_label_sectionform_id_temp').style.display="table-cell";
 	document.getElementById(num+'_element_sectionform_id_temp').style.display="table-cell";
+		}
+		else {
+			document.getElementById(num + '_label_sectionform_id_temp').style.display = "none";
+			document.getElementById(num + '_element_sectionform_id_temp').style.display = "table-cell";
+		}
+	}
 }
 
 function change_value_range(id, min_max, element_value)
@@ -2258,10 +2282,7 @@ jQuery(function() {
 		});	
 	}	
 	});
-	});			
-		
-
-
+	});
 }
 
 function hide_show_cents(hide, id)
@@ -3402,6 +3423,7 @@ function duplicate(id, e) {
 			{
 				w_hide_label=document.getElementById(id+"_hide_labelform_id_temp").value;	
 				w_first_val=document.getElementById(id+"_elementform_id_temp").value;
+				w_characters_limit = document.getElementById(id + "_charlimitform_id_temp").value;
 				w_title=document.getElementById(id+"_elementform_id_temp").title;
 				s=document.getElementById(id+"_elementform_id_temp").style.height;
 				w_size_h=s.substring(0,s.length-2);
@@ -3409,7 +3431,7 @@ function duplicate(id, e) {
 				atrs=return_attributes(id+'_elementform_id_temp');
 				w_attr_name=atrs[0];
 				w_attr_value=atrs[1];
-				type_textarea(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_size_h, w_first_val, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value);  break;
+				type_textarea(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_size_h, w_first_val, w_characters_limit, w_title, w_required, w_unique, w_class, w_attr_name, w_attr_value);  break;
 			}
 			
 				case 'type_wdeditor':
@@ -3641,10 +3663,12 @@ function duplicate(id, e) {
 				type_submitter_mail(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_first_val, w_title, w_required, w_unique, w_class, w_verification, w_verification_label, w_verification_placeholder, w_attr_name, w_attr_value, w_autofill); break;
 			}
 			case 'type_checkbox':
-			{	
-
+			{
 				w_randomize=document.getElementById(id+"_randomizeform_id_temp").value;
 				w_allow_other=document.getElementById(id+"_allow_otherform_id_temp").value;
+
+				w_limit_choice = document.getElementById(id + "_limitchoice_numform_id_temp").value;
+				w_limit_choice_alert = document.getElementById(id + "_limitchoicealert_numform_id_temp").value;
 
 				if(document.getElementById(id+"_rowcol_numform_id_temp").value)	
 				{
@@ -3733,7 +3757,7 @@ function duplicate(id, e) {
 				atrs=return_attributes(id+'_elementform_id_temp'+v);
 				w_attr_name=atrs[0];
 				w_attr_value=atrs[1];
-				type_checkbox(gen, w_field_label,w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol, w_required, w_randomize, w_allow_other, w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params); break;
+				type_checkbox(gen, w_field_label,w_field_label_size, w_field_label_pos, w_field_option_pos, w_hide_label, w_flow, w_choices, w_choices_checked, w_rowcol, w_limit_choice, w_limit_choice_alert, w_required, w_randomize, w_allow_other, w_allow_other_num, w_class, w_attr_name, w_attr_value, w_value_disabled, w_choices_value, w_choices_params); break;
 			}
 			
 			case 'type_paypal_checkbox':
@@ -4030,17 +4054,19 @@ function duplicate(id, e) {
 
 			case 'type_paypal_total':
 			{
-				
 				w_hide_label=document.getElementById(id+"_hide_labelform_id_temp").value;	
 				w_size = jQuery('#'+id+"paypal_totalform_id_temp").css('width') ? jQuery('#'+id+"paypal_totalform_id_temp").css('width').substring(0,jQuery('#'+id+"paypal_totalform_id_temp").css('width').length-2) : '300';
-				type_paypal_total(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size); break;
+				w_hide_total_currency = document.getElementById(id + "_hide_totalcurrency_id_temp").value;
+				type_paypal_total(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_class, w_size, w_hide_total_currency);
+				break;
 			}
 				
       
 			case 'type_stripe':
 			{	
-
-				type_stripe(gen, w_size, w_field_label_size, w_field_label_pos, w_class); break;
+				w_hide_label = document.getElementById(id+"_hide_labelform_id_temp").value;
+				type_stripe(gen, w_field_label, w_field_label_size, w_field_label_pos, w_hide_label, w_size, w_class);
+				break;
 			}
 	
 			case 'type_star_rating':
