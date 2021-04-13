@@ -1,0 +1,79 @@
+/* ========= INFORMATION ============================
+	- document:  WP Coder!
+	- author:    Dmytro Lobov 
+	- url:       https://wow-estore.com/
+==================================================== */
+.venue-container{
+	margin: 0 auto ;
+	width: 100%;
+	display: grid;
+	grid-template-columns: auto auto;
+	padding: 40px;
+}
+.hrs{
+	margin: 10px 0px !important;
+}
+label{
+	margin-left : 15px !important;
+}
+.venue-card{
+	border: 2px solid #828282;
+	border-radius: 5px;
+	margin: 15px;
+	padding: 20px;
+}
+.desc{
+	display: flex;
+	flex-direction: row;
+}
+.info{
+	display: flex;
+	flex-direction: column;
+}
+.image{
+	margin-right: 15px;
+}
+.image img {
+	height : 170px !important ;
+	width: 170px !important ;
+}
+.knowmore{
+	text-align: right;
+	bottom: 0;
+}
+.knowmore > a{
+	cursor: pointer;
+	font-size: 11px;
+}
+.key{
+	font-size: 18px;
+	font-weight: 500;
+}
+.value{
+	font-weight: 100;
+}
+.key > i {
+	color: #828282 ;
+	margin-right: 10px;
+}
+.price{
+	float: right;
+	font-size: 13px;
+}
+.submit{
+	background-color:#5B3275;
+	color: white ;
+	padding: 10px 50px; 
+	transition: 0.2s ;
+}
+.submit:hover{
+	color: white;
+	background-color: #9B5CC5 ;
+}
+.right{
+	float: right;
+}
+.otheractions{
+	width: 500px;
+	margin: 0 auto ;
+}
