@@ -1,0 +1,100 @@
+/* ========= INFORMATION ============================
+	- document:  WP Coder!
+	- author:    Dmytro Lobov 
+	- url:       https://wow-estore.com/
+==================================================== */
+.card-body{
+	display: flex;
+	flex-direction: row;
+}
+.round{
+	width: 150px !important;
+	height: 150px !important;
+	border-radius: 50% !important;
+}
+.imgbox{
+	margin-right: 25px;
+}
+.card-header{
+	font-size: 20px;
+}
+.card-footer  span  i{
+	cursor: pointer;
+	transition: 0.2s;
+}
+.icons{
+	float: right;
+}
+.card-footer  i:hover{
+	transform: scale(1.15);
+}
+.visitweb{
+	border: 5px solid #5B3275;
+	color: #5B3275;
+	font-size: 15px;
+	padding: 3px 20px;
+	text-decoration: none;
+	transition: 0.2s;
+	margin: 10px 0px;
+}
+.visitweb:hover{
+	background-color: #5B3275;
+	color: #fff;
+	text-decoration: none;
+}
+.desctext{
+	font-size: 20px;
+}
+select{
+	width: 150px;
+}
+.card-container{
+	display: grid;
+	grid-template-columns: auto auto;
+	padding: 40px;
+}
+.card{
+	margin:15px;
+}
+.pricemsg{
+	font-size: 18px;
+	float : right;
+	text-decoration: underline;
+}
+h5{
+	margin-top: 0px !important ;
+	margin-bottom: 15px !important ;
+	font-size: 20px;
+	
+}
+.otheractions{
+	width: 500px;
+	margin: 0 auto ;
+}
+.venue-card{
+	border: 2px solid #828282;
+	border-radius: 5px;
+	margin: 15px;
+	padding: 20px;
+}
+.key{
+	font-size: 18px;
+	font-weight: 500;
+}
+.submit{
+	background-color:#5B3275;
+	color: white ;
+	padding: 10px 50px; 
+	transition: 0.2s ;
+}
+.submit:hover{
+	color: white;
+	background-color: #9B5CC5 ;
+}
+.right{
+	float: right;
+}
+.sqbtn{
+	margin-right: 10px;
+	cursor: pointer;
+}

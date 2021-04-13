@@ -1,0 +1,16 @@
+2021-03-30T14:33:46+00:00 CRITICAL syntax error, unexpected end of file in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T14:34:05+00:00 CRITICAL syntax error, unexpected end of file in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T14:34:28+00:00 CRITICAL syntax error, unexpected end of file in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T15:48:10+00:00 CRITICAL syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T15:50:45+00:00 CRITICAL syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T15:50:48+00:00 CRITICAL syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T15:50:57+00:00 CRITICAL syntax error, unexpected '(', expecting identifier (T_STRING) or variable (T_VARIABLE) or '{' or '$' in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 12
+
+2021-03-30T16:06:27+00:00 CRITICAL syntax error, unexpected '}', expecting ';' or ',' in C:\xampp\htdocs\splice\wp-content\plugins\insert-php-code-snippet\shortcode-handler.php(65) : eval()'d code on line 23
+

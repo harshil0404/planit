@@ -1,0 +1,39 @@
+/* ========= INFORMATION ============================
+	- document:  WP Coder!
+	- author:    Dmytro Lobov 
+	- url:       https://wow-estore.com/
+==================================================== */
+body{
+        font-family: 'sniglet' , sans-serif ;
+}
+#general-info{
+	padding: 40px;
+	width: 800px;
+	margin: 0 auto;
+}
+#general-info input {
+	font-size: 22px !important;
+}
+.submit{
+	background-color:#5B3275;
+	color: white ;
+	float: right;
+	padding: 10px 50px; 
+	transition: 0.2s ;
+	font-size : 22px ;
+}
+.submit:hover{
+	color: white;
+	background-color: #9B5CC5 ;
+}
+label{
+	color:#5B3275;
+	font-size: 22px ; 
+}
+label.req:before{
+	content: '* ';
+	color: red ;
+}
+#evetype, #evetype option{
+	padding: 7px 10px;
+}

@@ -1,0 +1,74 @@
+/* ========= INFORMATION ============================
+	- document:  WP Coder!
+	- author:    Dmytro Lobov 
+	- url:       https://wow-estore.com/
+==================================================== */
+#managers{
+	width: 800px;
+	margin: 0 auto;
+}
+.contain{
+	padding: 20px;
+	border: 2px solid #8282;
+	border-radius:12px;
+	margin: 15px 0;
+}
+.contain-head{
+	text-align: center;
+	font-size: 25px;
+	font-style: italic;
+	margin: 0 0 15px 0;
+	color:  #5B3275;
+}
+.contain-body{
+	margin: 0 auto;
+}
+.photo-option{
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+.photo-option div{
+	margin: 10px 10px;
+}
+.photo-option input, .photo-option label{
+	font-size: 18px;
+}
+hr{
+	width: 80%;
+}
+.managetxt{
+	text-align: center;
+	width: 70% ;
+	margin: 0 auto;
+	background-color: #a7a7a7;
+	border-radius: 8px;
+	padding: 10px 20px;
+}
+.inline{
+        display: inline !important;
+    }
+.submit{
+	background-color:#5B3275;
+	color: white ;
+	padding: 10px 50px; 
+	transition: 0.2s ;
+}
+.submit:hover{
+	color: white;
+	background-color: #9B5CC5 ;
+}
+.right{
+	float: right;
+}
+#sideevents{
+	width: 60px;
+	display: inline;
+}
+.price-msg{
+	margin: 0 auto;
+	text-align: center;
+	font-size: 15px;
+	color: rgb(104, 104, 104);
+}
